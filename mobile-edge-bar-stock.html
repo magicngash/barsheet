@@ -1,348 +1,488 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <base target="_top">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
+import React, { useState, useEffect } from 'react';
+import { Calendar, Clock, User, Plus, Edit3, Trash2, Check, X } from 'lucide-react';
 
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-        color: #333;
-        font-size: 16px;
-        line-height: 1.4;
-      }
+const ViolinTutorScheduler = () => {
+  const [appointments, setAppointments] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [view, setView] = useState('calendar');
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingAppointment, setEditingAppointment] = useState(null);
 
-      .container {
-        width: 100vw;
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        min-height: 100vh;
-        padding: 12px;
+  // Initialize with sample data
+  useEffect(() => {
+    const sampleStudents = [
+      { id: 1, name: 'Emma Johnson', email: 'emma@email.com', phone: '0712-345-678', level: 'Beginner', rate: 2500 },
+      { id: 2, name: 'David Chen', email: 'david@email.com', phone: '0723-456-789', level: 'Intermediate', rate: 3000 },
+      { id: 3, name: 'Sarah Williams', email: 'sarah@email.com', phone: '0734-567-890', level: 'Advanced', rate: 3500 }
+    ];
+    
+    const sampleAppointments = [
+      {
+        id: 1,
+        studentId: 1,
+        date: '2024-07-19',
+        time: '10:00',
+        duration: 60,
+        type: 'Regular Lesson',
+        status: 'confirmed',
+        notes: 'Work on bow hold and posture'
+      },
+      {
+        id: 2,
+        studentId: 2,
+        date: '2024-07-19',
+        time: '14:00',
+        duration: 45,
+        type: 'Regular Lesson',
+        status: 'confirmed',
+        notes: 'Practice scales and vibrato'
       }
+    ];
 
-      h2 {
-        text-align: center;
-        color: #2c3e50;
-        margin-bottom: 16px;
-        font-size: 1.4rem;
-        font-weight: 600;
-        padding-top: 8px;
-      }
+    setStudents(sampleStudents);
+    setAppointments(sampleAppointments);
+  }, []);
 
-      .header-icon {
-        font-size: 1.2em;
-        margin-right: 8px;
-      }
+  const [newAppointment, setNewAppointment] = useState({
+    studentId: '',
+    date: '',
+    time: '',
+    duration: 60,
+    type: 'Regular Lesson',
+    status: 'confirmed',
+    notes: ''
+  });
 
-      .staff-section {
-        margin-bottom: 16px;
-        text-align: center;
-      }
+  const [newStudent, setNewStudent] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    level: 'Beginner',
+    rate: 2500
+  });
 
-      .staff-section label {
-        display: block;
-        font-weight: 600;
-        color: #34495e;
-        margin-bottom: 8px;
-        font-size: 1rem;
-      }
+  const addStudent = () => {
+    if (newStudent.name && newStudent.email) {
+      const student = {
+        id: Date.now(),
+        ...newStudent
+      };
+      setStudents([...students, student]);
+      setNewStudent({     name: '', email: '', phone: '', level: 'Beginner', rate: 2500 });
+    }
+  };
 
-      #staff {
-        width: 100%;
-        max-width: 250px;
-        padding: 12px;
-        border: 2px solid #e0e6ed;
-        border-radius: 8px;
-        font-size: 1rem;
-        background: white;
-        color: #2c3e50;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        appearance: none;
-      }
+  const addAppointment = () => {
+    if (newAppointment.studentId && newAppointment.date && newAppointment.time) {
+      const appointment = {
+        id: Date.now(),
+        ...newAppointment
+      };
+      setAppointments([...appointments, appointment]);
+      setNewAppointment({
+        studentId: '',
+        date: '',
+        time: '',
+        duration: 60,
+        type: 'Regular Lesson',
+        status: 'confirmed',
+        notes: ''
+      });
+      setShowAddForm(false);
+    }
+  };
 
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        background: white;
-        font-size: 0.9rem;
-        margin-bottom: 16px;
-      }
+  const updateAppointment = () => {
+    setAppointments(appointments.map(apt => 
+      apt.id === editingAppointment.id ? editingAppointment : apt
+    ));
+    setEditingAppointment(null);
+  };
 
-      th {
-        background: linear-gradient(135deg, #3498db, #2980b9);
-        color: white;
-        padding: 12px 4px;
-        text-align: center;
-        font-weight: 600;
-        font-size: 0.85rem;
-        position: sticky;
-        top: 0;
-        z-index: 10;
-      }
+  const deleteAppointment = (id) => {
+    setAppointments(appointments.filter(apt => apt.id !== id));
+  };
 
-      th:first-child {
-        width: 45%;
-        text-align: left;
-        padding-left: 8px;
-      }
+  const getStudentName = (studentId) => {
+    const student = students.find(s => s.id === studentId);
+    return student ? student.name : 'Unknown Student';
+  };
 
-      th:nth-child(2),
-      th:nth-child(3) {
-        width: 27.5%;
-      }
+  const getStudentRate = (studentId) => {
+    const student = students.find(s => s.id === studentId);
+    return student ? student.rate : 0;
+  };
 
-      td {
-        padding: 8px 4px;
-        border-bottom: 1px solid #ecf0f1;
-        vertical-align: middle;
-      }
+  const getTodaysAppointments = () => {
+    const today = new Date().toISOString().split('T')[0];
+    return appointments.filter(apt => apt.date === today);
+  };
 
-      tr:nth-child(even) {
-        background-color: #f9f9f9;
-      }
+  const getWeekAppointments = () => {
+    const today = new Date();
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay());
+    
+    const weekAppointments = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(startOfWeek);
+      date.setDate(startOfWeek.getDate() + i);
+      const dateStr = date.toISOString().split('T')[0];
+      const dayAppointments = appointments.filter(apt => apt.date === dateStr);
+      weekAppointments.push({
+        date: dateStr,
+        dayName: date.toLocaleDateString('en-US', { weekday: 'short' }),
+        appointments: dayAppointments
+      });
+    }
+    return weekAppointments;
+  };
 
-      .item-name {
-        font-weight: 500;
-        color: #2c3e50;
-        font-size: 0.9rem;
-        text-align: left;
-        padding-left: 8px;
-        word-wrap: break-word;
-        line-height: 1.3;
-      }
+  const exportToGoogleCalendar = (appointment) => {
+    const student = students.find(s => s.id === appointment.studentId);
+    const startTime = new Date(`${appointment.date}T${appointment.time}`);
+    const endTime = new Date(startTime.getTime() + appointment.duration * 60000);
+    
+    const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Violin Lesson - ${student.name}&dates=${startTime.toISOString().replace(/[-:]/g, '').split('.')[0]}Z/${endTime.toISOString().replace(/[-:]/g, '').split('.')[0]}Z&details=${encodeURIComponent(`Student: ${student.name}\nLevel: ${student.level}\nRate: KSh ${student.rate}\nNotes: ${appointment.notes}`)}&location=Music Studio`;
+    
+    window.open(googleCalendarUrl, '_blank');
+  };
 
-      input[type="number"] {
-        width: 100%;
-        max-width: 70px;
-        padding: 8px 4px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        text-align: center;
-        font-size: 0.9rem;
-        background: white;
-        -moz-appearance: textfield;
-        -webkit-appearance: none;
-      }
+  if (view === 'students') {
+    return (
+      <div className="max-w-4xl mx-auto p-6 bg-white min-h-screen">
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 mb-3">Violin Tutor Scheduler</h1>
+          <div className="flex justify-center gap-2">
+            <button onClick={() => setView('calendar')} className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600">
+              Calendar
+            </button>
+          </div>
+        </div>
 
-      input[type="number"]::-webkit-outer-spin-button,
-      input[type="number"]::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-      }
+        <div className="bg-gray-50 p-4 rounded-lg mb-6">
+          <h3 className="font-semibold mb-3">Add New Student</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input
+              type="text"
+              placeholder="Student Name"
+              value={newStudent.name}
+              onChange={(e) => setNewStudent({...newStudent, name: e.target.value})}
+              className="p-2 border rounded"
+            />
+            <input
+              type="email"
+              placeholder="Email"
+              value={newStudent.email}
+              onChange={(e) => setNewStudent({...newStudent, email: e.target.value})}
+              className="p-2 border rounded"
+            />
+            <input
+              type="tel"
+              placeholder="Phone"
+              value={newStudent.phone}
+              onChange={(e) => setNewStudent({...newStudent, phone: e.target.value})}
+              className="p-2 border rounded"
+            />
+            <select
+              value={newStudent.level}
+              onChange={(e) => setNewStudent({...newStudent, level: e.target.value})}
+              className="p-2 border rounded"
+            >
+              <option value="Beginner">Beginner</option>
+              <option value="Intermediate">Intermediate</option>
+              <option value="Advanced">Advanced</option>
+            </select>
+            <input
+              type="number"
+              placeholder="Lesson Rate (KSh)"
+              value={newStudent.rate}
+              onChange={(e) => setNewStudent({...newStudent, rate: Number(e.target.value)})}
+              className="p-2 border rounded"
+            />
+            <button
+              onClick={addStudent}
+              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+            >
+              Add Student
+            </button>
+          </div>
+        </div>
 
-      input[type="number"]:focus {
-        outline: none;
-        border-color: #3498db;
-        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-      }
+        <div className="space-y-4">
+          <h3 className="font-semibold">Current Students</h3>
+          {students.map(student => (
+            <div key={student.id} className="bg-white border rounded-lg p-4">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h4 className="font-medium">{student.name}</h4>
+                  <p className="text-sm text-gray-600">{student.email}</p>
+                  <p className="text-sm text-gray-600">{student.phone}</p>
+                  <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-1">
+                    {student.level}
+                  </span>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold">KSh {student.rate}/lesson</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
-      .submit-container {
-        text-align: center;
-        margin-top: 16px;
-        padding-bottom: 16px;
-      }
-
-      button[type="submit"] {
-        background: linear-gradient(135deg, #27ae60, #229954);
-        color: white;
-        padding: 14px 32px;
-        border: none;
-        border-radius: 25px;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        width: 100%;
-        max-width: 250px;
-        -webkit-appearance: none;
-      }
-
-      button[type="submit"]:active {
-        transform: scale(0.98);
-        opacity: 0.9;
-      }
-
-      /* Very small screens */
-      @media (max-width: 360px) {
-        .container {
-          padding: 8px;
-        }
-        
-        h2 {
-          font-size: 1.2rem;
-          margin-bottom: 12px;
-        }
-        
-        table {
-          font-size: 0.8rem;
-        }
-        
-        th {
-          padding: 10px 2px;
-          font-size: 0.75rem;
-        }
-        
-        td {
-          padding: 6px 2px;
-        }
-        
-        .item-name {
-          font-size: 0.8rem;
-          padding-left: 4px;
-        }
-        
-        input[type="number"] {
-          max-width: 60px;
-          padding: 6px 2px;
-          font-size: 0.8rem;
-        }
-        
-        button[type="submit"] {
-          padding: 12px 24px;
-          font-size: 0.9rem;
-        }
-      }
-
-      /* Landscape orientation */
-      @media (orientation: landscape) and (max-height: 500px) {
-        .container {
-          padding: 8px;
-        }
-        
-        h2 {
-          font-size: 1.2rem;
-          margin-bottom: 8px;
-          padding-top: 4px;
-        }
-        
-        .staff-section {
-          margin-bottom: 12px;
-        }
-        
-        th {
-          padding: 8px 4px;
-          font-size: 0.8rem;
-        }
-        
-        td {
-          padding: 6px 4px;
-        }
-        
-        .submit-container {
-          margin-top: 12px;
-          padding-bottom: 8px;
-        }
-        
-        button[type="submit"] {
-          padding: 10px 24px;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <h2>
-        <span class="header-icon">🍺</span>
-        Bar Stock Entry
-      </h2>
-
-      <div class="staff-section">
-        <label for="staff">Staff Name:</label>
-        <select id="staff">
-          <option>John</option>
-          <option>Mary</option>
-          <option>Lucy</option>
-          <option>Kevin</option>
-        </select>
+  return (
+    <div className="max-w-6xl mx-auto p-6 bg-white min-h-screen">
+      <div className="text-center mb-6">
+        <h1 className="text-2xl font-bold text-gray-800 mb-3">Violin Tutor Scheduler</h1>
+        <div className="flex justify-center gap-2">
+          <button onClick={() => setView('students')} className="px-3 py-1 bg-gray-500 text-white rounded text-sm hover:bg-gray-600">
+            <User className="inline w-3 h-3 mr-1" />
+            Students
+          </button>
+          <button onClick={() => setShowAddForm(true)} className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600">
+            <Plus className="inline w-3 h-3 mr-1" />
+            Add
+          </button>
+        </div>
       </div>
 
-      <form id="stockForm">
-        <table id="itemsTable">
-          <thead>
-            <tr>
-              <th>Item</th>
-              <th>Received</th>
-              <th>Sold</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-        
-        <div class="submit-container">
-          <button type="submit">Submit Entry</button>
+      {/* Today's Overview */}
+      <div className="bg-blue-50 p-4 rounded-lg mb-6">
+        <h3 className="font-semibold mb-2 flex items-center">
+          <Clock className="w-4 h-4 mr-2" />
+          Today's Lessons
+        </h3>
+        {getTodaysAppointments().length === 0 ? (
+          <p className="text-gray-600">No lessons scheduled for today</p>
+        ) : (
+          <div className="space-y-2">
+            {getTodaysAppointments().map(apt => (
+              <div key={apt.id} className="bg-white p-3 rounded border">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <span className="font-medium">{apt.time}</span> - {getStudentName(apt.studentId)}
+                    <span className="text-sm text-gray-600 ml-2">({apt.duration} min)</span>
+                  </div>
+                  <span className="text-sm font-medium">KSh {getStudentRate(apt.studentId)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Weekly Calendar */}
+      <div className="bg-gray-50 p-4 rounded-lg mb-6">
+        <h3 className="font-semibold mb-4 flex items-center">
+          <Calendar className="w-4 h-4 mr-2" />
+          This Week
+        </h3>
+        <div className="grid grid-cols-7 gap-2">
+          {getWeekAppointments().map(day => (
+            <div key={day.date} className="bg-white p-3 rounded border">
+              <div className="font-medium text-sm text-center mb-2">
+                {day.dayName}
+                <br />
+                <span className="text-xs text-gray-600">
+                  {new Date(day.date).getDate()}
+                </span>
+              </div>
+              <div className="space-y-1">
+                {day.appointments.map(apt => (
+                  <div key={apt.id} className="text-xs bg-blue-100 p-1 rounded">
+                    <div className="font-medium">{apt.time}</div>
+                    <div className="truncate">{getStudentName(apt.studentId)}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
-      </form>
+      </div>
+
+      {/* All Appointments */}
+      <div className="space-y-4">
+        <h3 className="font-semibold">All Upcoming Lessons</h3>
+        {appointments.map(apt => (
+          <div key={apt.id} className="bg-white border rounded-lg p-4">
+            <div className="flex justify-between items-start">
+              <div className="flex-1">
+                <div className="flex items-center gap-4 mb-2">
+                  <h4 className="font-medium">{getStudentName(apt.studentId)}</h4>
+                  <span className="text-sm bg-gray-100 px-2 py-1 rounded">{apt.type}</span>
+                  <span className={`text-sm px-2 py-1 rounded ${apt.status === 'confirmed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                    {apt.status}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600 mb-2">
+                  {new Date(apt.date).toLocaleDateString()} at {apt.time} ({apt.duration} minutes)
+                </p>
+                {apt.notes && (
+                  <p className="text-sm text-gray-700 italic">{apt.notes}</p>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold">KSh {getStudentRate(apt.studentId)}</span>
+                <button
+                  onClick={() => exportToGoogleCalendar(apt)}
+                  className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
+                >
+                  Add to Calendar
+                </button>
+                <button
+                  onClick={() => setEditingAppointment(apt)}
+                  className="p-1 text-blue-500 hover:bg-blue-50 rounded"
+                >
+                  <Edit3 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => deleteAppointment(apt.id)}
+                  className="p-1 text-red-500 hover:bg-red-50 rounded"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Add Appointment Modal */}
+      {showAddForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
+            <h3 className="font-semibold mb-4">Schedule New Lesson</h3>
+            <div className="space-y-4">
+              <select
+                value={newAppointment.studentId}
+                onChange={(e) => setNewAppointment({...newAppointment, studentId: Number(e.target.value)})}
+                className="w-full p-2 border rounded"
+              >
+                <option value="">Select Student</option>
+                {students.map(student => (
+                  <option key={student.id} value={student.id}>{student.name}</option>
+                ))}
+              </select>
+              <input
+                type="date"
+                value={newAppointment.date}
+                onChange={(e) => setNewAppointment({...newAppointment, date: e.target.value})}
+                className="w-full p-2 border rounded"
+              />
+              <input
+                type="time"
+                value={newAppointment.time}
+                onChange={(e) => setNewAppointment({...newAppointment, time: e.target.value})}
+                className="w-full p-2 border rounded"
+              />
+              <select
+                value={newAppointment.duration}
+                onChange={(e) => setNewAppointment({...newAppointment, duration: Number(e.target.value)})}
+                className="w-full p-2 border rounded"
+              >
+                <option value={30}>30 minutes</option>
+                <option value={45}>45 minutes</option>
+                <option value={60}>60 minutes</option>
+                <option value={90}>90 minutes</option>
+              </select>
+              <textarea
+                placeholder="Notes (optional)"
+                value={newAppointment.notes}
+                onChange={(e) => setNewAppointment({...newAppointment, notes: e.target.value})}
+                className="w-full p-2 border rounded"
+                rows="3"
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={addAppointment}
+                  className="flex-1 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                >
+                  <Check className="inline w-4 h-4 mr-1" />
+                  Schedule
+                </button>
+                <button
+                  onClick={() => setShowAddForm(false)}
+                  className="flex-1 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                >
+                  <X className="inline w-4 h-4 mr-1" />
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Appointment Modal */}
+      {editingAppointment && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
+            <h3 className="font-semibold mb-4">Edit Lesson</h3>
+            <div className="space-y-4">
+              <select
+                value={editingAppointment.studentId}
+                onChange={(e) => setEditingAppointment({...editingAppointment, studentId: Number(e.target.value)})}
+                className="w-full p-2 border rounded"
+              >
+                {students.map(student => (
+                  <option key={student.id} value={student.id}>{student.name}</option>
+                ))}
+              </select>
+              <input
+                type="date"
+                value={editingAppointment.date}
+                onChange={(e) => setEditingAppointment({...editingAppointment, date: e.target.value})}
+                className="w-full p-2 border rounded"
+              />
+              <input
+                type="time"
+                value={editingAppointment.time}
+                onChange={(e) => setEditingAppointment({...editingAppointment, time: e.target.value})}
+                className="w-full p-2 border rounded"
+              />
+              <select
+                value={editingAppointment.duration}
+                onChange={(e) => setEditingAppointment({...editingAppointment, duration: Number(e.target.value)})}
+                className="w-full p-2 border rounded"
+              >
+                <option value={30}>30 minutes</option>
+                <option value={45}>45 minutes</option>
+                <option value={60}>60 minutes</option>
+                <option value={90}>90 minutes</option>
+              </select>
+              <textarea
+                placeholder="Notes (optional)"
+                value={editingAppointment.notes}
+                onChange={(e) => setEditingAppointment({...editingAppointment, notes: e.target.value})}
+                className="w-full p-2 border rounded"
+                rows="3"
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={updateAppointment}
+                  className="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                >
+                  <Check className="inline w-4 h-4 mr-1" />
+                  Update
+                </button>
+                <button
+                  onClick={() => setEditingAppointment(null)}
+                  className="flex-1 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                >
+                  <X className="inline w-4 h-4 mr-1" />
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+  );
+};
 
-    <script>
-      const items = [
-        "Tusker Lager", "Smirnoff", "Whitecap", "Guinness", "Heineken",
-        "Captain Morgan", "Chrome", "Red Label", "Krest", "Water",
-        "Juice", "Ice Cubes", "Soda", "Viceroy", "Snacks",
-        "Cigarettes", "Chasers", "Wines", "Beer Towers", "Baileys"
-      ];
-
-      const tableBody = document.querySelector("#itemsTable tbody");
-
-      items.forEach((item, index) => {
-        const row = document.createElement("tr");
-
-        const itemCell = document.createElement("td");
-        itemCell.textContent = item;
-        itemCell.className = "item-name";
-
-        const receivedCell = document.createElement("td");
-        const receivedInput = document.createElement("input");
-        receivedInput.type = "number";
-        receivedInput.name = `received_${index}`;
-        receivedInput.min = "0";
-        receivedInput.placeholder = "0";
-        receivedInput.inputMode = "numeric";
-        receivedInput.pattern = "[0-9]*";
-        receivedCell.appendChild(receivedInput);
-
-        const soldCell = document.createElement("td");
-        const soldInput = document.createElement("input");
-        soldInput.type = "number";
-        soldInput.name = `sold_${index}`;
-        soldInput.min = "0";
-        soldInput.placeholder = "0";
-        soldInput.inputMode = "numeric";
-        soldInput.pattern = "[0-9]*";
-        soldCell.appendChild(soldInput);
-
-        row.appendChild(itemCell);
-        row.appendChild(receivedCell);
-        row.appendChild(soldCell);
-
-        tableBody.appendChild(row);
-      });
-
-      document.getElementById("stockForm").addEventListener("submit", function (e) {
-        e.preventDefault();
-        const staff = document.getElementById("staff").value;
-
-        const itemsData = items.map((item, index) => ({
-          name: item,
-          received: document.querySelector(`[name=received_${index}]`).value || "0",
-          sold: document.querySelector(`[name=sold_${index}]`).value || "0"
-        }));
-
-        google.script.run.withSuccessHandler((msg) => {
-          alert(msg);
-          location.reload(); // optional
-        }).submitForm({
-          staff: staff,
-          items: itemsData
-        });
-      });
-    </script>
-  </body>
-</html>
+export default ViolinTutorScheduler;
