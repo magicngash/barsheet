@@ -1,488 +1,596 @@
-import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, User, Plus, Edit3, Trash2, Check, X } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cabinet Cutting List Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.js"></script>
+    <style>
+        /* Tailwind CSS CDN styles */
+        @import url('https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css');
+        
+        .bg-orange-50 { background-color: #fff7ed; }
+        .text-orange-800 { color: #9a3412; }
+        .bg-blue-50 { background-color: #eff6ff; }
+        .text-blue-800 { color: #1e40af; }
+        .bg-green-50 { background-color: #f0fdf4; }
+        .text-green-800 { color: #166534; }
+        .bg-purple-50 { background-color: #faf5ff; }
+        .text-purple-800 { color: #6b21a8; }
+        .text-blue-600 { color: #2563eb; }
+        
+        .hidden { display: none; }
+        .block { display: block; }
+        
+        input[type="number"], input[type="text"], select {
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+        }
+        
+        input[type="checkbox"] {
+            margin-right: 0.5rem;
+        }
+        
+        button {
+            transition: background-color 0.15s ease-in-out;
+        }
+        
+        button:hover {
+            opacity: 0.9;
+        }
+        
+        .scrollable-results {
+            max-height: 24rem;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="max-w-6xl mx-auto p-6">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">
+                Cabinet Cutting List Generator
+            </h1>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Input Panel -->
+                <div class="space-y-6">
+                    <!-- Basic Information -->
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h2 class="text-lg font-semibold mb-4 text-blue-800">Basic Cabinet Information</h2>
+                        
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-sm font-medium mb-1">Cabinet Type:</label>
+                                <select id="cabinetType" class="w-full p-2 border rounded-md">
+                                    <option value="base">Base Cabinet</option>
+                                    <option value="top">Top Cabinet</option>
+                                    <option value="wardrobe">Wardrobe</option>
+                                </select>
+                            </div>
+                            
+                            <div class="grid grid-cols-3 gap-3">
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Width (mm):</label>
+                                    <input type="number" id="width" value="600" class="w-full p-2 border rounded-md">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Height (mm):</label>
+                                    <input type="number" id="height" value="900" class="w-full p-2 border rounded-md">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Depth (mm):</label>
+                                    <input type="number" id="depth" value="500" class="w-full p-2 border rounded-md">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="includeBackPanel" checked class="mr-2">
+                                    Include Back Panel
+                                </label>
+                            </div>
+                        </div>
+                    </div>
 
-const ViolinTutorScheduler = () => {
-  const [appointments, setAppointments] = useState([]);
-  const [students, setStudents] = useState([]);
-  const [view, setView] = useState('calendar');
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [editingAppointment, setEditingAppointment] = useState(null);
+                    <!-- Door Configuration -->
+                    <div class="bg-orange-50 p-4 rounded-lg">
+                        <h2 class="text-lg font-semibold mb-4 text-orange-800">Door Configuration</h2>
+                        
+                        <div class="space-y-3">
+                            <div>
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="hasDoors" checked class="mr-2" onchange="toggleDoorOptions()">
+                                    Include Doors
+                                </label>
+                            </div>
+                            
+                            <div id="doorOptions" class="space-y-3">
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Door Style:</label>
+                                    <select id="doorStyle" class="w-full p-2 border rounded-md">
+                                        <option value="overlay">Full Overlay</option>
+                                        <option value="partial_overlay">Partial Overlay</option>
+                                        <option value="inset">Inset</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Number of Doors:</label>
+                                    <input type="number" id="doorCount" value="2" min="1" max="4" class="w-20 p-2 border rounded-md" onchange="toggleDoorGap()">
+                                </div>
+                                
+                                <div id="doorGapContainer">
+                                    <label class="block text-sm font-medium mb-1">Gap Between Doors (mm):</label>
+                                    <input type="number" id="doorGap" value="2" min="1" max="10" class="w-20 p-2 border rounded-md">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-  // Initialize with sample data
-  useEffect(() => {
-    const sampleStudents = [
-      { id: 1, name: 'Emma Johnson', email: 'emma@email.com', phone: '0712-345-678', level: 'Beginner', rate: 2500 },
-      { id: 2, name: 'David Chen', email: 'david@email.com', phone: '0723-456-789', level: 'Intermediate', rate: 3000 },
-      { id: 3, name: 'Sarah Williams', email: 'sarah@email.com', phone: '0734-567-890', level: 'Advanced', rate: 3500 }
-    ];
-    
-    const sampleAppointments = [
-      {
-        id: 1,
-        studentId: 1,
-        date: '2024-07-19',
-        time: '10:00',
-        duration: 60,
-        type: 'Regular Lesson',
-        status: 'confirmed',
-        notes: 'Work on bow hold and posture'
-      },
-      {
-        id: 2,
-        studentId: 2,
-        date: '2024-07-19',
-        time: '14:00',
-        duration: 45,
-        type: 'Regular Lesson',
-        status: 'confirmed',
-        notes: 'Practice scales and vibrato'
-      }
-    ];
+                    <!-- Drawer Configuration -->
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h2 class="text-lg font-semibold mb-4 text-green-800">Drawer Configuration</h2>
+                        
+                        <div class="space-y-3">
+                            <div>
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="hasDrawers" class="mr-2" onchange="toggleDrawerOptions()">
+                                    Include Drawers
+                                </label>
+                            </div>
+                            
+                            <div id="drawerOptions" class="hidden space-y-3">
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Number of Drawers:</label>
+                                    <input type="number" id="drawerCount" value="3" min="1" class="w-20 p-2 border rounded-md">
+                                </div>
+                                
+                                <div>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="splitColumns" class="mr-2">
+                                        Split into Columns
+                                    </label>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Custom Heights (comma-separated):</label>
+                                    <input type="text" id="customHeights" placeholder="e.g., 200, 150, 180" class="w-full p-2 border rounded-md">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-    setStudents(sampleStudents);
-    setAppointments(sampleAppointments);
-  }, []);
+                    <!-- Shelf Configuration -->
+                    <div class="bg-purple-50 p-4 rounded-lg">
+                        <h2 class="text-lg font-semibold mb-4 text-purple-800">Shelf Configuration</h2>
+                        
+                        <div class="space-y-3">
+                            <div>
+                                <label class="flex items-center">
+                                    <input type="checkbox" id="hasShelves" class="mr-2" onchange="toggleShelfOptions()">
+                                    Include Shelves
+                                </label>
+                            </div>
+                            
+                            <div id="shelfOptions" class="hidden">
+                                <label class="block text-sm font-medium mb-1">Number of Shelves:</label>
+                                <input type="number" id="shelfCount" value="1" min="0" class="w-20 p-2 border rounded-md">
+                            </div>
+                        </div>
+                    </div>
 
-  const [newAppointment, setNewAppointment] = useState({
-    studentId: '',
-    date: '',
-    time: '',
-    duration: 60,
-    type: 'Regular Lesson',
-    status: 'confirmed',
-    notes: ''
-  });
-
-  const [newStudent, setNewStudent] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    level: 'Beginner',
-    rate: 2500
-  });
-
-  const addStudent = () => {
-    if (newStudent.name && newStudent.email) {
-      const student = {
-        id: Date.now(),
-        ...newStudent
-      };
-      setStudents([...students, student]);
-      setNewStudent({     name: '', email: '', phone: '', level: 'Beginner', rate: 2500 });
-    }
-  };
-
-  const addAppointment = () => {
-    if (newAppointment.studentId && newAppointment.date && newAppointment.time) {
-      const appointment = {
-        id: Date.now(),
-        ...newAppointment
-      };
-      setAppointments([...appointments, appointment]);
-      setNewAppointment({
-        studentId: '',
-        date: '',
-        time: '',
-        duration: 60,
-        type: 'Regular Lesson',
-        status: 'confirmed',
-        notes: ''
-      });
-      setShowAddForm(false);
-    }
-  };
-
-  const updateAppointment = () => {
-    setAppointments(appointments.map(apt => 
-      apt.id === editingAppointment.id ? editingAppointment : apt
-    ));
-    setEditingAppointment(null);
-  };
-
-  const deleteAppointment = (id) => {
-    setAppointments(appointments.filter(apt => apt.id !== id));
-  };
-
-  const getStudentName = (studentId) => {
-    const student = students.find(s => s.id === studentId);
-    return student ? student.name : 'Unknown Student';
-  };
-
-  const getStudentRate = (studentId) => {
-    const student = students.find(s => s.id === studentId);
-    return student ? student.rate : 0;
-  };
-
-  const getTodaysAppointments = () => {
-    const today = new Date().toISOString().split('T')[0];
-    return appointments.filter(apt => apt.date === today);
-  };
-
-  const getWeekAppointments = () => {
-    const today = new Date();
-    const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - today.getDay());
-    
-    const weekAppointments = [];
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(startOfWeek);
-      date.setDate(startOfWeek.getDate() + i);
-      const dateStr = date.toISOString().split('T')[0];
-      const dayAppointments = appointments.filter(apt => apt.date === dateStr);
-      weekAppointments.push({
-        date: dateStr,
-        dayName: date.toLocaleDateString('en-US', { weekday: 'short' }),
-        appointments: dayAppointments
-      });
-    }
-    return weekAppointments;
-  };
-
-  const exportToGoogleCalendar = (appointment) => {
-    const student = students.find(s => s.id === appointment.studentId);
-    const startTime = new Date(`${appointment.date}T${appointment.time}`);
-    const endTime = new Date(startTime.getTime() + appointment.duration * 60000);
-    
-    const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Violin Lesson - ${student.name}&dates=${startTime.toISOString().replace(/[-:]/g, '').split('.')[0]}Z/${endTime.toISOString().replace(/[-:]/g, '').split('.')[0]}Z&details=${encodeURIComponent(`Student: ${student.name}\nLevel: ${student.level}\nRate: KSh ${student.rate}\nNotes: ${appointment.notes}`)}&location=Music Studio`;
-    
-    window.open(googleCalendarUrl, '_blank');
-  };
-
-  if (view === 'students') {
-    return (
-      <div className="max-w-4xl mx-auto p-6 bg-white min-h-screen">
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800 mb-3">Violin Tutor Scheduler</h1>
-          <div className="flex justify-center gap-2">
-            <button onClick={() => setView('calendar')} className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600">
-              Calendar
-            </button>
-          </div>
-        </div>
-
-        <div className="bg-gray-50 p-4 rounded-lg mb-6">
-          <h3 className="font-semibold mb-3">Add New Student</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input
-              type="text"
-              placeholder="Student Name"
-              value={newStudent.name}
-              onChange={(e) => setNewStudent({...newStudent, name: e.target.value})}
-              className="p-2 border rounded"
-            />
-            <input
-              type="email"
-              placeholder="Email"
-              value={newStudent.email}
-              onChange={(e) => setNewStudent({...newStudent, email: e.target.value})}
-              className="p-2 border rounded"
-            />
-            <input
-              type="tel"
-              placeholder="Phone"
-              value={newStudent.phone}
-              onChange={(e) => setNewStudent({...newStudent, phone: e.target.value})}
-              className="p-2 border rounded"
-            />
-            <select
-              value={newStudent.level}
-              onChange={(e) => setNewStudent({...newStudent, level: e.target.value})}
-              className="p-2 border rounded"
-            >
-              <option value="Beginner">Beginner</option>
-              <option value="Intermediate">Intermediate</option>
-              <option value="Advanced">Advanced</option>
-            </select>
-            <input
-              type="number"
-              placeholder="Lesson Rate (KSh)"
-              value={newStudent.rate}
-              onChange={(e) => setNewStudent({...newStudent, rate: Number(e.target.value)})}
-              className="p-2 border rounded"
-            />
-            <button
-              onClick={addStudent}
-              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-            >
-              Add Student
-            </button>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <h3 className="font-semibold">Current Students</h3>
-          {students.map(student => (
-            <div key={student.id} className="bg-white border rounded-lg p-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h4 className="font-medium">{student.name}</h4>
-                  <p className="text-sm text-gray-600">{student.email}</p>
-                  <p className="text-sm text-gray-600">{student.phone}</p>
-                  <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mt-1">
-                    {student.level}
-                  </span>
+                    <button onclick="generateCuttingList()" class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700">
+                        Generate Cutting List
+                    </button>
                 </div>
-                <div className="text-right">
-                  <p className="font-semibold">KSh {student.rate}/lesson</p>
+
+                <!-- Results Panel -->
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h2 class="text-lg font-semibold mb-4 text-gray-800">Cutting List Results</h2>
+                    
+                    <div id="resultsContainer" class="text-center text-gray-500 py-8">
+                        <p>Configure your cabinet specifications and click "Generate Cutting List" to see results</p>
+                    </div>
                 </div>
-              </div>
             </div>
-          ))}
         </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="max-w-6xl mx-auto p-6 bg-white min-h-screen">
-      <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-3">Violin Tutor Scheduler</h1>
-        <div className="flex justify-center gap-2">
-          <button onClick={() => setView('students')} className="px-3 py-1 bg-gray-500 text-white rounded text-sm hover:bg-gray-600">
-            <User className="inline w-3 h-3 mr-1" />
-            Students
-          </button>
-          <button onClick={() => setShowAddForm(true)} className="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600">
-            <Plus className="inline w-3 h-3 mr-1" />
-            Add
-          </button>
-        </div>
-      </div>
-
-      {/* Today's Overview */}
-      <div className="bg-blue-50 p-4 rounded-lg mb-6">
-        <h3 className="font-semibold mb-2 flex items-center">
-          <Clock className="w-4 h-4 mr-2" />
-          Today's Lessons
-        </h3>
-        {getTodaysAppointments().length === 0 ? (
-          <p className="text-gray-600">No lessons scheduled for today</p>
-        ) : (
-          <div className="space-y-2">
-            {getTodaysAppointments().map(apt => (
-              <div key={apt.id} className="bg-white p-3 rounded border">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <span className="font-medium">{apt.time}</span> - {getStudentName(apt.studentId)}
-                    <span className="text-sm text-gray-600 ml-2">({apt.duration} min)</span>
-                  </div>
-                  <span className="text-sm font-medium">KSh {getStudentRate(apt.studentId)}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Weekly Calendar */}
-      <div className="bg-gray-50 p-4 rounded-lg mb-6">
-        <h3 className="font-semibold mb-4 flex items-center">
-          <Calendar className="w-4 h-4 mr-2" />
-          This Week
-        </h3>
-        <div className="grid grid-cols-7 gap-2">
-          {getWeekAppointments().map(day => (
-            <div key={day.date} className="bg-white p-3 rounded border">
-              <div className="font-medium text-sm text-center mb-2">
-                {day.dayName}
-                <br />
-                <span className="text-xs text-gray-600">
-                  {new Date(day.date).getDate()}
-                </span>
-              </div>
-              <div className="space-y-1">
-                {day.appointments.map(apt => (
-                  <div key={apt.id} className="text-xs bg-blue-100 p-1 rounded">
-                    <div className="font-medium">{apt.time}</div>
-                    <div className="truncate">{getStudentName(apt.studentId)}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* All Appointments */}
-      <div className="space-y-4">
-        <h3 className="font-semibold">All Upcoming Lessons</h3>
-        {appointments.map(apt => (
-          <div key={apt.id} className="bg-white border rounded-lg p-4">
-            <div className="flex justify-between items-start">
-              <div className="flex-1">
-                <div className="flex items-center gap-4 mb-2">
-                  <h4 className="font-medium">{getStudentName(apt.studentId)}</h4>
-                  <span className="text-sm bg-gray-100 px-2 py-1 rounded">{apt.type}</span>
-                  <span className={`text-sm px-2 py-1 rounded ${apt.status === 'confirmed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                    {apt.status}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-600 mb-2">
-                  {new Date(apt.date).toLocaleDateString()} at {apt.time} ({apt.duration} minutes)
-                </p>
-                {apt.notes && (
-                  <p className="text-sm text-gray-700 italic">{apt.notes}</p>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-semibold">KSh {getStudentRate(apt.studentId)}</span>
-                <button
-                  onClick={() => exportToGoogleCalendar(apt)}
-                  className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
-                >
-                  Add to Calendar
-                </button>
-                <button
-                  onClick={() => setEditingAppointment(apt)}
-                  className="p-1 text-blue-500 hover:bg-blue-50 rounded"
-                >
-                  <Edit3 className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => deleteAppointment(apt.id)}
-                  className="p-1 text-red-500 hover:bg-red-50 rounded"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Add Appointment Modal */}
-      {showAddForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
-            <h3 className="font-semibold mb-4">Schedule New Lesson</h3>
-            <div className="space-y-4">
-              <select
-                value={newAppointment.studentId}
-                onChange={(e) => setNewAppointment({...newAppointment, studentId: Number(e.target.value)})}
-                className="w-full p-2 border rounded"
-              >
-                <option value="">Select Student</option>
-                {students.map(student => (
-                  <option key={student.id} value={student.id}>{student.name}</option>
-                ))}
-              </select>
-              <input
-                type="date"
-                value={newAppointment.date}
-                onChange={(e) => setNewAppointment({...newAppointment, date: e.target.value})}
-                className="w-full p-2 border rounded"
-              />
-              <input
-                type="time"
-                value={newAppointment.time}
-                onChange={(e) => setNewAppointment({...newAppointment, time: e.target.value})}
-                className="w-full p-2 border rounded"
-              />
-              <select
-                value={newAppointment.duration}
-                onChange={(e) => setNewAppointment({...newAppointment, duration: Number(e.target.value)})}
-                className="w-full p-2 border rounded"
-              >
-                <option value={30}>30 minutes</option>
-                <option value={45}>45 minutes</option>
-                <option value={60}>60 minutes</option>
-                <option value={90}>90 minutes</option>
-              </select>
-              <textarea
-                placeholder="Notes (optional)"
-                value={newAppointment.notes}
-                onChange={(e) => setNewAppointment({...newAppointment, notes: e.target.value})}
-                className="w-full p-2 border rounded"
-                rows="3"
-              />
-              <div className="flex gap-2">
-                <button
-                  onClick={addAppointment}
-                  className="flex-1 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-                >
-                  <Check className="inline w-4 h-4 mr-1" />
-                  Schedule
-                </button>
-                <button
-                  onClick={() => setShowAddForm(false)}
-                  className="flex-1 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-                >
-                  <X className="inline w-4 h-4 mr-1" />
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Appointment Modal */}
-      {editingAppointment && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
-            <h3 className="font-semibold mb-4">Edit Lesson</h3>
-            <div className="space-y-4">
-              <select
-                value={editingAppointment.studentId}
-                onChange={(e) => setEditingAppointment({...editingAppointment, studentId: Number(e.target.value)})}
-                className="w-full p-2 border rounded"
-              >
-                {students.map(student => (
-                  <option key={student.id} value={student.id}>{student.name}</option>
-                ))}
-              </select>
-              <input
-                type="date"
-                value={editingAppointment.date}
-                onChange={(e) => setEditingAppointment({...editingAppointment, date: e.target.value})}
-                className="w-full p-2 border rounded"
-              />
-              <input
-                type="time"
-                value={editingAppointment.time}
-                onChange={(e) => setEditingAppointment({...editingAppointment, time: e.target.value})}
-                className="w-full p-2 border rounded"
-              />
-              <select
-                value={editingAppointment.duration}
-                onChange={(e) => setEditingAppointment({...editingAppointment, duration: Number(e.target.value)})}
-                className="w-full p-2 border rounded"
-              >
-                <option value={30}>30 minutes</option>
-                <option value={45}>45 minutes</option>
-                <option value={60}>60 minutes</option>
-                <option value={90}>90 minutes</option>
-              </select>
-              <textarea
-                placeholder="Notes (optional)"
-                value={editingAppointment.notes}
-                onChange={(e) => setEditingAppointment({...editingAppointment, notes: e.target.value})}
-                className="w-full p-2 border rounded"
-                rows="3"
-              />
-              <div className="flex gap-2">
-                <button
-                  onClick={updateAppointment}
-                  className="flex-1 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                >
-                  <Check className="inline w-4 h-4 mr-1" />
-                  Update
-                </button>
-                <button
-                  onClick={() => setEditingAppointment(null)}
-                  className="flex-1 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-                >
-                  <X className="inline w-4 h-4 mr-1" />
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
-  );
-};
 
-export default ViolinTutorScheduler;
+    <script>
+        // Toggle functions for UI
+        function toggleDoorOptions() {
+            const hasDoors = document.getElementById('hasDoors').checked;
+            const doorOptions = document.getElementById('doorOptions');
+            doorOptions.style.display = hasDoors ? 'block' : 'none';
+            toggleDoorGap();
+        }
+
+        function toggleDoorGap() {
+            const doorCount = parseInt(document.getElementById('doorCount').value);
+            const doorGapContainer = document.getElementById('doorGapContainer');
+            doorGapContainer.style.display = doorCount > 1 ? 'block' : 'none';
+        }
+
+        function toggleDrawerOptions() {
+            const hasDrawers = document.getElementById('hasDrawers').checked;
+            const drawerOptions = document.getElementById('drawerOptions');
+            drawerOptions.className = hasDrawers ? 'block space-y-3' : 'hidden space-y-3';
+        }
+
+        function toggleShelfOptions() {
+            const hasShelves = document.getElementById('hasShelves').checked;
+            const shelfOptions = document.getElementById('shelfOptions');
+            shelfOptions.className = hasShelves ? 'block' : 'hidden';
+        }
+
+        // Initialize UI
+        toggleDoorOptions();
+        toggleDrawerOptions();
+        toggleShelfOptions();
+
+        function generateCuttingList() {
+            // Constants
+            const PANEL_THICKNESS = 18;
+            const BACK_PANEL_THICKNESS = 6;
+            const GROOVE_DEPTH = 6;
+            const DRAWER_CLEARANCE = 2;
+            const DRAWER_DEPTH_REDUCTION = 50;
+
+            // Get input values
+            const cabinetData = {
+                type: document.getElementById('cabinetType').value,
+                width: parseInt(document.getElementById('width').value),
+                height: parseInt(document.getElementById('height').value),
+                depth: parseInt(document.getElementById('depth').value),
+                include_back_panel: document.getElementById('includeBackPanel').checked,
+                has_doors: document.getElementById('hasDoors').checked,
+                door_config: {
+                    style: document.getElementById('doorStyle').value,
+                    count: parseInt(document.getElementById('doorCount').value),
+                    gap: parseInt(document.getElementById('doorGap').value)
+                },
+                has_drawers: document.getElementById('hasDrawers').checked,
+                drawer_config: {
+                    count: parseInt(document.getElementById('drawerCount').value),
+                    split_columns: document.getElementById('splitColumns').checked,
+                    custom_heights: document.getElementById('customHeights').value
+                },
+                has_shelves: document.getElementById('hasShelves').checked,
+                shelf_count: parseInt(document.getElementById('shelfCount').value)
+            };
+
+            const cutting_list = [];
+            
+            const cabinet_width = cabinetData.width;
+            const cabinet_height = cabinetData.height;
+            const cabinet_depth = cabinetData.depth;
+            const include_back = cabinetData.include_back_panel;
+            
+            const internal_width = cabinet_width - (2 * PANEL_THICKNESS);
+            const groove_reduction = include_back ? GROOVE_DEPTH : 0;
+            
+            // Side Panels
+            const side_depth = cabinet_depth - groove_reduction;
+            cutting_list.push({
+                name: "Side Panel",
+                qty: 2,
+                width: side_depth,
+                height: cabinet_height,
+                notes: include_back ? "Grooved for back panel" : ""
+            });
+            
+            // Top and Bottom Panels
+            const panel_width = internal_width;
+            const panel_depth = cabinet_depth - groove_reduction;
+            
+            cutting_list.push({
+                name: "Top Panel",
+                qty: 1,
+                width: panel_width,
+                depth: panel_depth,
+                notes: include_back ? "Fits between sides, grooved for back panel" : "Fits between sides"
+            });
+            
+            cutting_list.push({
+                name: "Bottom Panel", 
+                qty: 1,
+                width: panel_width,
+                depth: panel_depth,
+                notes: include_back ? "Fits between sides, grooved for back panel" : "Fits between sides"
+            });
+            
+            // Back Panel
+            if (include_back) {
+                const back_panel_width = internal_width + (2 * GROOVE_DEPTH);
+                const back_panel_height = cabinet_height - (2 * PANEL_THICKNESS) + (2 * GROOVE_DEPTH);
+                
+                cutting_list.push({
+                    name: "Back Panel",
+                    qty: 1,
+                    width: back_panel_width,
+                    height: back_panel_height,
+                    thickness: `${BACK_PANEL_THICKNESS}mm`,
+                    notes: "6mm material, fits into grooves"
+                });
+            }
+            
+            let available_height = cabinet_height - (2 * PANEL_THICKNESS);
+            
+            // Drawers
+            if (cabinetData.has_drawers) {
+                const drawer_count = cabinetData.drawer_config.count;
+                const split_columns = cabinetData.drawer_config.split_columns;
+                
+                let drawer_heights = [];
+                if (cabinetData.drawer_config.custom_heights) {
+                    const heights = cabinetData.drawer_config.custom_heights
+                        .split(',')
+                        .map(h => parseInt(h.trim()))
+                        .filter(h => !isNaN(h));
+                    if (heights.length === drawer_count) {
+                        drawer_heights = heights;
+                    }
+                }
+                
+                if (drawer_heights.length === 0) {
+                    const total_gap_height = (drawer_count - 1) * DRAWER_CLEARANCE;
+                    const drawer_height = Math.floor((available_height - total_gap_height) / drawer_count);
+                    drawer_heights = Array(drawer_count).fill(drawer_height);
+                }
+                
+                const drawer_depth = cabinet_depth - DRAWER_DEPTH_REDUCTION;
+                const drawer_internal_depth = drawer_depth - PANEL_THICKNESS;
+                
+                let drawer_width = internal_width;
+                let columns = 1;
+                
+                if (split_columns) {
+                    cutting_list.push({
+                        name: "Center Divider",
+                        qty: 1,
+                        width: cabinet_depth - groove_reduction,
+                        height: available_height,
+                        notes: "Vertical divider for split drawers"
+                    });
+                    
+                    drawer_width = Math.floor((internal_width - PANEL_THICKNESS) / 2);
+                    columns = 2;
+                }
+                
+                drawer_heights.forEach((height, i) => {
+                    const drawer_side_height = height - DRAWER_CLEARANCE;
+                    
+                    for (let col = 0; col < columns; col++) {
+                        const col_suffix = split_columns ? ` Col ${col + 1}` : "";
+                        
+                        cutting_list.push({
+                            name: `Drawer Front #${i + 1}${col_suffix}`,
+                            qty: 1,
+                            width: drawer_width,
+                            height: height,
+                            notes: "External drawer face"
+                        });
+                        
+                        cutting_list.push({
+                            name: `Drawer Back #${i + 1}${col_suffix}`,
+                            qty: 1,
+                            width: drawer_width - (2 * PANEL_THICKNESS),
+                            height: drawer_side_height,
+                            notes: "Fits between drawer sides"
+                        });
+                        
+                        cutting_list.push({
+                            name: `Drawer Side #${i + 1}${col_suffix}`,
+                            qty: 2,
+                            length: drawer_internal_depth,
+                            height: drawer_side_height,
+                            notes: "Grooved for bottom panel"
+                        });
+                        
+                        const bottom_width = drawer_width - (2 * PANEL_THICKNESS) + (2 * GROOVE_DEPTH);
+                        const bottom_depth = drawer_internal_depth + GROOVE_DEPTH;
+                        cutting_list.push({
+                            name: `Drawer Bottom #${i + 1}${col_suffix}`,
+                            qty: 1,
+                            width: bottom_width,
+                            depth: bottom_depth,
+                            thickness: `${BACK_PANEL_THICKNESS}mm`,
+                            notes: "6mm material, sits in grooves"
+                        });
+                    }
+                });
+                
+                const total_drawer_height = drawer_heights.reduce((sum, h) => sum + h, 0) + 
+                                          ((drawer_count - 1) * DRAWER_CLEARANCE);
+                available_height -= total_drawer_height;
+            }
+            
+            // Shelves
+            if (cabinetData.has_shelves && available_height > 0 && cabinetData.shelf_count > 0) {
+                const shelf_width = internal_width - 4;
+                const shelf_depth = cabinet_depth - groove_reduction - 50;
+                
+                cutting_list.push({
+                    name: "Shelf",
+                    qty: cabinetData.shelf_count,
+                    width: shelf_width,
+                    depth: shelf_depth,
+                    notes: "Adjustable shelf, sits 50mm from front"
+                });
+            }
+            
+            // Doors
+            if (cabinetData.has_doors) {
+                const door_style = cabinetData.door_config.style;
+                const door_count = cabinetData.door_config.count;
+                const door_gap = cabinetData.door_config.gap;
+                
+                let door_width, door_height;
+                
+                if (door_style === 'overlay') {
+                    if (door_count === 1) {
+                        door_width = cabinet_width;
+                        door_height = cabinet_height;
+                    } else {
+                        const total_gap_width = (door_count - 1) * door_gap;
+                        door_width = Math.floor((cabinet_width - total_gap_width) / door_count);
+                        door_height = cabinet_height;
+                    }
+                } else if (door_style === 'inset') {
+                    if (door_count === 1) {
+                        door_width = internal_width - 4;
+                        door_height = available_height - 4;
+                    } else {
+                        const total_gap_width = (door_count - 1) * door_gap;
+                        door_width = Math.floor((internal_width - 4 - total_gap_width) / door_count);
+                        door_height = available_height - 4;
+                    }
+                } else { // partial_overlay
+                    const overlay_amount = 6;
+                    if (door_count === 1) {
+                        door_width = internal_width + (2 * overlay_amount);
+                        door_height = available_height + (2 * overlay_amount);
+                    } else {
+                        const total_gap_width = (door_count - 1) * door_gap;
+                        door_width = Math.floor((internal_width + (2 * overlay_amount) - total_gap_width) / door_count);
+                        door_height = available_height + (2 * overlay_amount);
+                    }
+                }
+                
+                cutting_list.push({
+                    name: "Door",
+                    qty: door_count,
+                    width: door_width,
+                    height: door_height,
+                    notes: `${door_style} style, ${door_count === 1 ? 'single' : door_count + ' doors with ' + door_gap + 'mm gaps'}`
+                });
+                
+                const hinges_per_door = door_height > 1200 ? 3 : 2;
+                cutting_list.push({
+                    name: "Door Hinge",
+                    qty: door_count * hinges_per_door,
+                    notes: `${hinges_per_door} hinges per door`
+                });
+                
+                cutting_list.push({
+                    name: "Door Handle",
+                    qty: door_count,
+                    notes: "Door handles or knobs"
+                });
+            }
+            
+            // Wardrobe specific
+            if (cabinetData.type === 'wardrobe' && available_height >= 200) {
+                cutting_list.push({
+                    name: "Hanging Rail",
+                    qty: 1,
+                    length: internal_width - 20,
+                    notes: "25mm diameter hanging rail"
+                });
+                
+                cutting_list.push({
+                    name: "Rail Support Bracket",
+                    qty: 2,
+                    notes: "End-mounted rail brackets"
+                });
+            }
+
+            displayResults(cutting_list, cabinetData);
+        }
+
+        function formatDimensions(part) {
+            const dims = [];
+            if (part.width !== undefined) dims.push(`W:${part.width}`);
+            if (part.height !== undefined) dims.push(`H:${part.height}`);
+            if (part.depth !== undefined) dims.push(`D:${part.depth}`);
+            if (part.length !== undefined) dims.push(`L:${part.length}`);
+            return dims.join(' × ') + 'mm';
+        }
+
+        function displayResults(cuttingList, cabinetData) {
+            const container = document.getElementById('resultsContainer');
+            const totalParts = cuttingList.reduce((sum, part) => sum + part.qty, 0);
+            
+            let html = `
+                <div class="space-y-4">
+                    <div class="bg-white p-4 rounded border">
+                        <h3 class="font-bold text-lg mb-2">
+                            ${cabinetData.type.toUpperCase()} CABINET
+                        </h3>
+                        <p class="text-sm text-gray-600 mb-4">
+                            Dimensions: ${cabinetData.width}W × ${cabinetData.height}H × ${cabinetData.depth}D mm
+                        </p>
+                        
+                        <div class="space-y-2 scrollable-results">
+                            ${cuttingList.map((part, index) => `
+                                <div class="border-b pb-2 text-sm">
+                                    <div class="flex justify-between items-start">
+                                        <div class="flex-1">
+                                            <span class="font-medium">${index + 1}. ${part.name}</span>
+                                            <div class="text-gray-600">
+                                                Qty: ${part.qty} | ${formatDimensions(part)}
+                                                ${part.thickness ? ` (${part.thickness})` : ''}
+                                            </div>
+                                            ${part.notes ? `
+                                                <div class="text-xs text-blue-600 italic">
+                                                    ${part.notes}
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="mt-4 pt-4 border-t">
+                            <div class="text-sm font-medium">
+                                SUMMARY: ${cuttingList.length} different parts, ${totalParts} total pieces
+                            </div>
+                            <div class="text-xs text-gray-600">
+                                Material: 18mm panels, 6mm backs/bottoms
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button onclick="exportResults()" class="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
+                        Export to File
+                    </button>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+            
+            // Store current results globally for export
+            window.currentResults = cuttingList;
+            window.currentCabinetData = cabinetData;
+        }
+
+        function exportResults() {
+            if (!window.currentResults) {
+                alert('No cutting list to export. Generate a list first.');
+                return;
+            }
+            
+            const content = `CUTTING LIST - ${window.currentCabinetData.type.toUpperCase()} CABINET\n` +
+                `Dimensions: ${window.currentCabinetData.width}W × ${window.currentCabinetData.height}H × ${window.currentCabinetData.depth}D mm\n` +
+                '='.repeat(70) + '\n\n' +
+                window.currentResults.map((part, i) => 
+                    `${i + 1}. ${part.name.padEnd(25)} Qty: ${part.qty.toString().padStart(2)}  ${formatDimensions(part).padEnd(20)}${part.thickness ? ` (${part.thickness})` : ''}${part.notes ? ` - ${part.notes}` : ''}`
+                ).join('\n') +
+                '\n\n' + '='.repeat(70) + '\n' +
+                `SUMMARY: ${window.currentResults.length} different parts, ${window.currentResults.reduce((sum, part) => sum + part.qty, 0)} total pieces\n` +
+                'Material: 18mm panels, 6mm backs/bottoms';
+            
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `cutting_list_${window.currentCabinetData.type}_${window.currentCabinetData.width}x${window.currentCabinetData.height}x${window.currentCabinetData.depth}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
