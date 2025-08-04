@@ -3,594 +3,1192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cabinet Cutting List Generator</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.js"></script>
+    <title>SDA Tithe Collection</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Tailwind CSS CDN styles */
-        @import url('https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css');
-        
-        .bg-orange-50 { background-color: #fff7ed; }
-        .text-orange-800 { color: #9a3412; }
-        .bg-blue-50 { background-color: #eff6ff; }
-        .text-blue-800 { color: #1e40af; }
-        .bg-green-50 { background-color: #f0fdf4; }
-        .text-green-800 { color: #166534; }
-        .bg-purple-50 { background-color: #faf5ff; }
-        .text-purple-800 { color: #6b21a8; }
-        .text-blue-600 { color: #2563eb; }
-        
-        .hidden { display: none; }
-        .block { display: block; }
-        
-        input[type="number"], input[type="text"], select {
-            border: 1px solid #d1d5db;
-            border-radius: 0.375rem;
-            padding: 0.5rem;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
-        input[type="checkbox"] {
-            margin-right: 0.5rem;
+
+        body {
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
-        
-        button {
-            transition: background-color 0.15s ease-in-out;
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 450px;
+            overflow: hidden;
+            min-height: 600px;
         }
-        
-        button:hover {
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 13px;
             opacity: 0.9;
         }
-        
-        .scrollable-results {
-            max-height: 24rem;
-            overflow-y: auto;
+
+        .logo {
+            width: 70px;
+            height: 70px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo i {
+            font-size: 35px;
+            color: #1e3a8a;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: #f1f5f9;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 14px;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-tab.active {
+            color: #1e3a8a;
+            background: white;
+            border-bottom: 3px solid #3b82f6;
+        }
+
+        .nav-tab:hover {
+            color: #1e3a8a;
+            background: #f8fafc;
+        }
+
+        .nav-tab i {
+            margin-right: 5px;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px 15px;
+            min-height: 400px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Payment Tab Styles */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #334155;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 12px 12px 38px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s;
+            background: #f8fafc;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            background: white;
+        }
+
+        .payment-rows {
+            margin-bottom: 20px;
+        }
+
+        .payment-row {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+
+        .payment-row:hover {
+            border-color: #cbd5e1;
+        }
+
+        .row-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .row-title {
+            font-weight: 600;
+            color: #1e3a8a;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+
+        .row-title i {
+            margin-right: 6px;
+            color: #3b82f6;
+        }
+
+        .row-amount {
+            font-weight: 700;
+            color: #3b82f6;
+            font-size: 16px;
+        }
+
+        .row-fields {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .purpose-label {
+            flex: 1;
+            font-weight: 500;
+            color: #334155;
+            font-size: 14px;
+            padding: 8px 0;
+        }
+
+        .amount-input {
+            width: 90px;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 15px;
+            text-align: center;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .amount-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .summary {
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            border: 1px solid #cbd5e1;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .summary-row.total {
+            font-weight: 700;
+            font-size: 18px;
+            color: #1e3a8a;
+            border-top: 1px solid #cbd5e1;
+            padding-top: 10px;
+            margin-top: 8px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(30, 58, 138, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn i {
+            margin-right: 8px;
+        }
+
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .message {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 13px;
+            display: none;
+        }
+
+        .message.success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .message.error {
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        .message.info {
+            background: #dbeafe;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+        }
+
+        .security-note {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        .security-note i {
+            margin-right: 5px;
+            color: #10b981;
+        }
+
+        /* History Tab Styles */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #64748b;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            color: #cbd5e1;
+            margin-bottom: 15px;
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: #334155;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .transaction-item {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 12px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+
+        .transaction-item:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .transaction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .transaction-id {
+            font-weight: 600;
+            color: #1e3a8a;
+            font-size: 14px;
+        }
+
+        .transaction-date {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .transaction-amount {
+            font-size: 18px;
+            font-weight: 700;
+            color: #059669;
+        }
+
+        .transaction-details {
+            margin-top: 10px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 13px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: #64748b;
+        }
+
+        .detail-value {
+            color: #334155;
+            font-weight: 500;
+        }
+
+        .status-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-completed {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-failed {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            color: #64748b;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-btn.active,
+        .filter-btn:hover {
+            background: #1e3a8a;
+            color: white;
+            border-color: #1e3a8a;
+        }
+
+        .history-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e3a8a;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 15px;
+            color: #64748b;
+            font-size: 11px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            .container {
+                border-radius: 0;
+                min-height: 100vh;
+            }
+            
+            .header {
+                padding: 20px 15px;
+            }
+            
+            .tab-content {
+                padding: 15px 10px;
+            }
+            
+            .amount-input {
+                width: 80px;
+            }
+            
+            .row-fields {
+                gap: 8px;
+            }
+
+            .filter-controls {
+                justify-content: center;
+            }
+
+            .transaction-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .history-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Smooth transitions */
+        .tab-content {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
-    <div class="max-w-6xl mx-auto p-6">
-        <div class="bg-white rounded-lg shadow-lg p-6">
-            <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">
-                Cabinet Cutting List Generator
-            </h1>
-            
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Input Panel -->
-                <div class="space-y-6">
-                    <!-- Basic Information -->
-                    <div class="bg-blue-50 p-4 rounded-lg">
-                        <h2 class="text-lg font-semibold mb-4 text-blue-800">Basic Cabinet Information</h2>
-                        
-                        <div class="space-y-3">
-                            <div>
-                                <label class="block text-sm font-medium mb-1">Cabinet Type:</label>
-                                <select id="cabinetType" class="w-full p-2 border rounded-md">
-                                    <option value="base">Base Cabinet</option>
-                                    <option value="top">Top Cabinet</option>
-                                    <option value="wardrobe">Wardrobe</option>
-                                </select>
-                            </div>
-                            
-                            <div class="grid grid-cols-3 gap-3">
-                                <div>
-                                    <label class="block text-sm font-medium mb-1">Width (mm):</label>
-                                    <input type="number" id="width" value="600" class="w-full p-2 border rounded-md">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium mb-1">Height (mm):</label>
-                                    <input type="number" id="height" value="900" class="w-full p-2 border rounded-md">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium mb-1">Depth (mm):</label>
-                                    <input type="number" id="depth" value="500" class="w-full p-2 border rounded-md">
-                                </div>
-                            </div>
-                            
-                            <div>
-                                <label class="flex items-center">
-                                    <input type="checkbox" id="includeBackPanel" checked class="mr-2">
-                                    Include Back Panel
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Door Configuration -->
-                    <div class="bg-orange-50 p-4 rounded-lg">
-                        <h2 class="text-lg font-semibold mb-4 text-orange-800">Door Configuration</h2>
-                        
-                        <div class="space-y-3">
-                            <div>
-                                <label class="flex items-center">
-                                    <input type="checkbox" id="hasDoors" checked class="mr-2" onchange="toggleDoorOptions()">
-                                    Include Doors
-                                </label>
-                            </div>
-                            
-                            <div id="doorOptions" class="space-y-3">
-                                <div>
-                                    <label class="block text-sm font-medium mb-1">Door Style:</label>
-                                    <select id="doorStyle" class="w-full p-2 border rounded-md">
-                                        <option value="overlay">Full Overlay</option>
-                                        <option value="partial_overlay">Partial Overlay</option>
-                                        <option value="inset">Inset</option>
-                                    </select>
-                                </div>
-                                
-                                <div>
-                                    <label class="block text-sm font-medium mb-1">Number of Doors:</label>
-                                    <input type="number" id="doorCount" value="2" min="1" max="4" class="w-20 p-2 border rounded-md" onchange="toggleDoorGap()">
-                                </div>
-                                
-                                <div id="doorGapContainer">
-                                    <label class="block text-sm font-medium mb-1">Gap Between Doors (mm):</label>
-                                    <input type="number" id="doorGap" value="2" min="1" max="10" class="w-20 p-2 border rounded-md">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Drawer Configuration -->
-                    <div class="bg-green-50 p-4 rounded-lg">
-                        <h2 class="text-lg font-semibold mb-4 text-green-800">Drawer Configuration</h2>
-                        
-                        <div class="space-y-3">
-                            <div>
-                                <label class="flex items-center">
-                                    <input type="checkbox" id="hasDrawers" class="mr-2" onchange="toggleDrawerOptions()">
-                                    Include Drawers
-                                </label>
-                            </div>
-                            
-                            <div id="drawerOptions" class="hidden space-y-3">
-                                <div>
-                                    <label class="block text-sm font-medium mb-1">Number of Drawers:</label>
-                                    <input type="number" id="drawerCount" value="3" min="1" class="w-20 p-2 border rounded-md">
-                                </div>
-                                
-                                <div>
-                                    <label class="flex items-center">
-                                        <input type="checkbox" id="splitColumns" class="mr-2">
-                                        Split into Columns
-                                    </label>
-                                </div>
-                                
-                                <div>
-                                    <label class="block text-sm font-medium mb-1">Custom Heights (comma-separated):</label>
-                                    <input type="text" id="customHeights" placeholder="e.g., 200, 150, 180" class="w-full p-2 border rounded-md">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Shelf Configuration -->
-                    <div class="bg-purple-50 p-4 rounded-lg">
-                        <h2 class="text-lg font-semibold mb-4 text-purple-800">Shelf Configuration</h2>
-                        
-                        <div class="space-y-3">
-                            <div>
-                                <label class="flex items-center">
-                                    <input type="checkbox" id="hasShelves" class="mr-2" onchange="toggleShelfOptions()">
-                                    Include Shelves
-                                </label>
-                            </div>
-                            
-                            <div id="shelfOptions" class="hidden">
-                                <label class="block text-sm font-medium mb-1">Number of Shelves:</label>
-                                <input type="number" id="shelfCount" value="1" min="0" class="w-20 p-2 border rounded-md">
-                            </div>
-                        </div>
-                    </div>
-
-                    <button onclick="generateCuttingList()" class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700">
-                        Generate Cutting List
-                    </button>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-church"></i>
+            </div>
+            <h1>SDA Tithe Collection</h1>
+            <p>Secure M-Pesa Payments</p>
+        </div>
+        
+        <div class="nav-tabs">
+            <div class="nav-tab active" id="paymentTab">
+                <i class="fas fa-money-bill-wave"></i> Payment
+            </div>
+            <div class="nav-tab" id="historyTab">
+                <i class="fas fa-history"></i> History
+            </div>
+        </div>
+        
+        <!-- Payment Tab Content -->
+        <div class="tab-content active" id="paymentContent">
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <div class="input-group">
+                    <i class="fas fa-mobile-alt"></i>
+                    <input type="tel" id="phone" class="form-control" placeholder="07XX XXX XXX" required>
                 </div>
-
-                <!-- Results Panel -->
-                <div class="bg-gray-50 p-4 rounded-lg">
-                    <h2 class="text-lg font-semibold mb-4 text-gray-800">Cutting List Results</h2>
-                    
-                    <div id="resultsContainer" class="text-center text-gray-500 py-8">
-                        <p>Configure your cabinet specifications and click "Generate Cutting List" to see results</p>
+            </div>
+            
+            <div class="payment-rows">
+                <div class="payment-row">
+                    <div class="row-header">
+                        <div class="row-title">
+                            <i class="fas fa-hand-holding-heart"></i> Tithe
+                        </div>
+                        <div class="row-amount">KES <span id="amount1">0</span></div>
+                    </div>
+                    <div class="row-fields">
+                        <div class="purpose-label">Return 10% of your income to God</div>
+                        <input type="number" id="input1" class="amount-input" placeholder="0" min="0">
+                    </div>
+                </div>
+                
+                <div class="payment-row">
+                    <div class="row-header">
+                        <div class="row-title">
+                            <i class="fas fa-gift"></i> Offering
+                        </div>
+                        <div class="row-amount">KES <span id="amount2">0</span></div>
+                    </div>
+                    <div class="row-fields">
+                        <div class="purpose-label">Freewill offering for church work</div>
+                        <input type="number" id="input2" class="amount-input" placeholder="0" min="0">
+                    </div>
+                </div>
+                
+                <div class="payment-row">
+                    <div class="row-header">
+                        <div class="row-title">
+                            <i class="fas fa-globe"></i> Mission
+                        </div>
+                        <div class="row-amount">KES <span id="amount3">0</span></div>
+                    </div>
+                    <div class="row-fields">
+                        <div class="purpose-label">Support for mission projects</div>
+                        <input type="number" id="input3" class="amount-input" placeholder="0" min="0">
+                    </div>
+                </div>
+                
+                <div class="payment-row">
+                    <div class="row-header">
+                        <div class="row-title">
+                            <i class="fas fa-building"></i> Building
+                        </div>
+                        <div class="row-amount">KES <span id="amount4">0</span></div>
+                    </div>
+                    <div class="row-fields">
+                        <div class="purpose-label">Church building fund</div>
+                        <input type="number" id="input4" class="amount-input" placeholder="0" min="0">
                     </div>
                 </div>
             </div>
+            
+            <div class="summary">
+                <div class="summary-row">
+                    <span>Tithe:</span>
+                    <span id="summary1">KES 0</span>
+                </div>
+                <div class="summary-row">
+                    <span>Offering:</span>
+                    <span id="summary2">KES 0</span>
+                </div>
+                <div class="summary-row">
+                    <span>Mission:</span>
+                    <span id="summary3">KES 0</span>
+                </div>
+                <div class="summary-row">
+                    <span>Building:</span>
+                    <span id="summary4">KES 0</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total to Pay:</span>
+                    <span id="totalAmount">KES 0</span>
+                </div>
+            </div>
+            
+            <button type="button" class="btn" id="payBtn">
+                <i class="fas fa-lock"></i> Pay Total via M-Pesa
+            </button>
+            
+            <div id="message" class="message"></div>
+            
+            <div class="security-note">
+                <i class="fas fa-shield-alt"></i> Secured by M-Pesa and SSL Encryption
+            </div>
+        </div>
+
+        <!-- History Tab Content -->
+        <div class="tab-content" id="historyContent">
+            <div class="history-stats" id="historyStats">
+                <!-- Stats will be loaded here -->
+            </div>
+
+            <div class="filter-controls">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="completed">Completed</button>
+                <button class="filter-btn" data-filter="pending">Pending</button>
+                <button class="filter-btn" data-filter="failed">Failed</button>
+            </div>
+            
+            <div id="transactionsList">
+                <!-- Transactions will be loaded here -->
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Seventh-day Adventist Church © 2024</p>
+            <p>All transactions are secure and confidential</p>
         </div>
     </div>
 
     <script>
-        // Toggle functions for UI
-        function toggleDoorOptions() {
-            const hasDoors = document.getElementById('hasDoors').checked;
-            const doorOptions = document.getElementById('doorOptions');
-            doorOptions.style.display = hasDoors ? 'block' : 'none';
-            toggleDoorGap();
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+            // In-memory storage for transactions (works in Claude.ai environment)
+            let transactions = [];
 
-        function toggleDoorGap() {
-            const doorCount = parseInt(document.getElementById('doorCount').value);
-            const doorGapContainer = document.getElementById('doorGapContainer');
-            doorGapContainer.style.display = doorCount > 1 ? 'block' : 'none';
-        }
-
-        function toggleDrawerOptions() {
-            const hasDrawers = document.getElementById('hasDrawers').checked;
-            const drawerOptions = document.getElementById('drawerOptions');
-            drawerOptions.className = hasDrawers ? 'block space-y-3' : 'hidden space-y-3';
-        }
-
-        function toggleShelfOptions() {
-            const hasShelves = document.getElementById('hasShelves').checked;
-            const shelfOptions = document.getElementById('shelfOptions');
-            shelfOptions.className = hasShelves ? 'block' : 'hidden';
-        }
-
-        // Initialize UI
-        toggleDoorOptions();
-        toggleDrawerOptions();
-        toggleShelfOptions();
-
-        function generateCuttingList() {
-            // Constants
-            const PANEL_THICKNESS = 18;
-            const BACK_PANEL_THICKNESS = 6;
-            const GROOVE_DEPTH = 6;
-            const DRAWER_CLEARANCE = 2;
-            const DRAWER_DEPTH_REDUCTION = 50;
-
-            // Get input values
-            const cabinetData = {
-                type: document.getElementById('cabinetType').value,
-                width: parseInt(document.getElementById('width').value),
-                height: parseInt(document.getElementById('height').value),
-                depth: parseInt(document.getElementById('depth').value),
-                include_back_panel: document.getElementById('includeBackPanel').checked,
-                has_doors: document.getElementById('hasDoors').checked,
-                door_config: {
-                    style: document.getElementById('doorStyle').value,
-                    count: parseInt(document.getElementById('doorCount').value),
-                    gap: parseInt(document.getElementById('doorGap').value)
+            // DOM Elements
+            const phoneInput = document.getElementById('phone');
+            const payBtn = document.getElementById('payBtn');
+            const messageDiv = document.getElementById('message');
+            const totalAmountSpan = document.getElementById('totalAmount');
+            const paymentTab = document.getElementById('paymentTab');
+            const historyTab = document.getElementById('historyTab');
+            const paymentContent = document.getElementById('paymentContent');
+            const historyContent = document.getElementById('historyContent');
+            const transactionsList = document.getElementById('transactionsList');
+            const historyStats = document.getElementById('historyStats');
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            
+            let currentFilter = 'all';
+            
+            // Payment rows data
+            const paymentRows = [
+                {
+                    purpose: 'Tithe',
+                    description: 'Return 10% of your income to God',
+                    input: document.getElementById('input1'),
+                    amount: document.getElementById('amount1'),
+                    summary: document.getElementById('summary1')
                 },
-                has_drawers: document.getElementById('hasDrawers').checked,
-                drawer_config: {
-                    count: parseInt(document.getElementById('drawerCount').value),
-                    split_columns: document.getElementById('splitColumns').checked,
-                    custom_heights: document.getElementById('customHeights').value
+                {
+                    purpose: 'Offering',
+                    description: 'Freewill offering for church work',
+                    input: document.getElementById('input2'),
+                    amount: document.getElementById('amount2'),
+                    summary: document.getElementById('summary2')
                 },
-                has_shelves: document.getElementById('hasShelves').checked,
-                shelf_count: parseInt(document.getElementById('shelfCount').value)
-            };
-
-            const cutting_list = [];
+                {
+                    purpose: 'Mission',
+                    description: 'Support for mission projects',
+                    input: document.getElementById('input3'),
+                    amount: document.getElementById('amount3'),
+                    summary: document.getElementById('summary3')
+                },
+                {
+                    purpose: 'Building',
+                    description: 'Church building fund',
+                    input: document.getElementById('input4'),
+                    amount: document.getElementById('amount4'),
+                    summary: document.getElementById('summary4')
+                }
+            ];
             
-            const cabinet_width = cabinetData.width;
-            const cabinet_height = cabinetData.height;
-            const cabinet_depth = cabinetData.depth;
-            const include_back = cabinetData.include_back_panel;
-            
-            const internal_width = cabinet_width - (2 * PANEL_THICKNESS);
-            const groove_reduction = include_back ? GROOVE_DEPTH : 0;
-            
-            // Side Panels
-            const side_depth = cabinet_depth - groove_reduction;
-            cutting_list.push({
-                name: "Side Panel",
-                qty: 2,
-                width: side_depth,
-                height: cabinet_height,
-                notes: include_back ? "Grooved for back panel" : ""
+            // Tab switching functionality
+            paymentTab.addEventListener('click', function() {
+                switchTab('payment');
             });
             
-            // Top and Bottom Panels
-            const panel_width = internal_width;
-            const panel_depth = cabinet_depth - groove_reduction;
-            
-            cutting_list.push({
-                name: "Top Panel",
-                qty: 1,
-                width: panel_width,
-                depth: panel_depth,
-                notes: include_back ? "Fits between sides, grooved for back panel" : "Fits between sides"
+            historyTab.addEventListener('click', function() {
+                switchTab('history');
+                loadTransactions();
+                updateHistoryStats();
             });
             
-            cutting_list.push({
-                name: "Bottom Panel", 
-                qty: 1,
-                width: panel_width,
-                depth: panel_depth,
-                notes: include_back ? "Fits between sides, grooved for back panel" : "Fits between sides"
-            });
-            
-            // Back Panel
-            if (include_back) {
-                const back_panel_width = internal_width + (2 * GROOVE_DEPTH);
-                const back_panel_height = cabinet_height - (2 * PANEL_THICKNESS) + (2 * GROOVE_DEPTH);
-                
-                cutting_list.push({
-                    name: "Back Panel",
-                    qty: 1,
-                    width: back_panel_width,
-                    height: back_panel_height,
-                    thickness: `${BACK_PANEL_THICKNESS}mm`,
-                    notes: "6mm material, fits into grooves"
-                });
+            function switchTab(tab) {
+                if (tab === 'payment') {
+                    paymentTab.classList.add('active');
+                    historyTab.classList.remove('active');
+                    paymentContent.classList.add('active');
+                    historyContent.classList.remove('active');
+                } else {
+                    historyTab.classList.add('active');
+                    paymentTab.classList.remove('active');
+                    historyContent.classList.add('active');
+                    paymentContent.classList.remove('active');
+                }
             }
             
-            let available_height = cabinet_height - (2 * PANEL_THICKNESS);
-            
-            // Drawers
-            if (cabinetData.has_drawers) {
-                const drawer_count = cabinetData.drawer_config.count;
-                const split_columns = cabinetData.drawer_config.split_columns;
-                
-                let drawer_heights = [];
-                if (cabinetData.drawer_config.custom_heights) {
-                    const heights = cabinetData.drawer_config.custom_heights
-                        .split(',')
-                        .map(h => parseInt(h.trim()))
-                        .filter(h => !isNaN(h));
-                    if (heights.length === drawer_count) {
-                        drawer_heights = heights;
+            // Format phone number input
+            phoneInput.addEventListener('input', function() {
+                let value = this.value.replace(/\D/g, '');
+                if (value.length > 0) {
+                    if (value.length <= 3) {
+                        value = value;
+                    } else if (value.length <= 6) {
+                        value = value.substring(0, 3) + ' ' + value.substring(3);
+                    } else {
+                        value = value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6, 9);
                     }
                 }
+                this.value = value;
+            });
+            
+            // Add event listeners to all amount inputs
+            paymentRows.forEach((row, index) => {
+                row.input.addEventListener('input', function() {
+                    updateRowAmount(index);
+                    updateTotal();
+                });
+            });
+            
+            // Update individual row amount
+            function updateRowAmount(index) {
+                const amount = parseFloat(paymentRows[index].input.value) || 0;
+                paymentRows[index].amount.textContent = amount.toLocaleString();
+                paymentRows[index].summary.textContent = `KES ${amount.toLocaleString()}`;
+            }
+            
+            // Update total amount
+            function updateTotal() {
+                let total = 0;
+                paymentRows.forEach(row => {
+                    total += parseFloat(row.input.value) || 0;
+                });
+                totalAmountSpan.textContent = `KES ${total.toLocaleString()}`;
                 
-                if (drawer_heights.length === 0) {
-                    const total_gap_height = (drawer_count - 1) * DRAWER_CLEARANCE;
-                    const drawer_height = Math.floor((available_height - total_gap_height) / drawer_count);
-                    drawer_heights = Array(drawer_count).fill(drawer_height);
+                // Enable/disable pay button based on total
+                payBtn.disabled = total < 10;
+            }
+            
+            // Handle payment button click
+            payBtn.addEventListener('click', function() {
+                const phone = phoneInput.value.replace(/\D/g, '');
+                
+                // Basic validation
+                if (phone.length !== 9) {
+                    showMessage('Please enter a valid phone number', 'error');
+                    return;
                 }
                 
-                const drawer_depth = cabinet_depth - DRAWER_DEPTH_REDUCTION;
-                const drawer_internal_depth = drawer_depth - PANEL_THICKNESS;
+                // Collect payment data
+                const payments = [];
+                let hasValidPayment = false;
                 
-                let drawer_width = internal_width;
-                let columns = 1;
+                paymentRows.forEach((row, index) => {
+                    const amount = parseFloat(row.input.value) || 0;
+                    
+                    if (amount > 0) {
+                        payments.push({
+                            purpose: row.purpose,
+                            description: row.description,
+                            amount: amount
+                        });
+                        hasValidPayment = true;
+                    }
+                });
                 
-                if (split_columns) {
-                    cutting_list.push({
-                        name: "Center Divider",
-                        qty: 1,
-                        width: cabinet_depth - groove_reduction,
-                        height: available_height,
-                        notes: "Vertical divider for split drawers"
+                if (!hasValidPayment) {
+                    showMessage('Please enter at least one payment amount', 'error');
+                    return;
+                }
+                
+                // Show processing state
+                payBtn.disabled = true;
+                payBtn.innerHTML = '<div class="loading"></div> Processing...';
+                showMessage('Initiating payment...', 'info');
+                
+                // Simulate API call
+                setTimeout(() => {
+                    // Simulate successful response
+                    const response = {
+                        success: true,
+                        message: 'Payment successful! Please check your phone for confirmation.',
+                        transactionId: 'TX' + Date.now().toString().slice(-9)
+                    };
+                    
+                    if (response.success) {
+                        // Save transaction
+                        saveTransaction(phone, payments, response.transactionId);
+                        
+                        showMessage(response.message, 'success');
+                        
+                        // Reset form after successful payment
+                        setTimeout(() => {
+                            resetForm();
+                        }, 3000);
+                    } else {
+                        showMessage('Payment failed. Please try again.', 'error');
+                    }
+                    
+                    // Reset button
+                    payBtn.disabled = false;
+                    payBtn.innerHTML = '<i class="fas fa-lock"></i> Pay Total via M-Pesa';
+                }, 2000);
+            });
+            
+            // Save transaction
+            function saveTransaction(phone, payments, transactionId) {
+                const transaction = {
+                    id: transactionId,
+                    phone: phone,
+                    payments: payments,
+                    date: new Date().toISOString(),
+                    status: 'completed'
+                };
+                
+                transactions.unshift(transaction);
+            }
+            
+            // Reset form
+            function resetForm() {
+                phoneInput.value = '';
+                paymentRows.forEach(row => {
+                    row.input.value = '';
+                    updateRowAmount(paymentRows.indexOf(row));
+                });
+                updateTotal();
+                hideMessage();
+            }
+            
+            // Show message
+            function showMessage(text, type) {
+                messageDiv.textContent = text;
+                messageDiv.className = 'message ' + type;
+                messageDiv.style.display = 'block';
+                
+                if (type === 'success') {
+                    setTimeout(() => {
+                        hideMessage();
+                    }, 5000);
+                }
+            }
+            
+            // Hide message
+            function hideMessage() {
+                messageDiv.style.display = 'none';
+            }
+            
+            // History Tab Functions
+            function loadTransactions() {
+                if (transactions.length === 0) {
+                    showEmptyState();
+                    return;
+                }
+                
+                displayTransactions(transactions);
+            }
+            
+            function showEmptyState() {
+                transactionsList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-receipt"></i>
+                        <h3>No Transactions Yet</h3>
+                        <p>Your tithe payment history will appear here once you make your first transaction.</p>
+                    </div>
+                `;
+            }
+            
+            function displayTransactions(allTransactions) {
+                const filteredTransactions = filterTransactions(allTransactions, currentFilter);
+                
+                if (filteredTransactions.length === 0) {
+                    transactionsList.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-filter"></i>
+                            <h3>No ${currentFilter === 'all' ? '' : currentFilter} Transactions</h3>
+                            <p>No transactions match the selected filter.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                const transactionsHTML = filteredTransactions.map(transaction => {
+                    const date = new Date(transaction.date);
+                    const formattedDate = date.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
                     });
                     
-                    drawer_width = Math.floor((internal_width - PANEL_THICKNESS) / 2);
-                    columns = 2;
-                }
-                
-                drawer_heights.forEach((height, i) => {
-                    const drawer_side_height = height - DRAWER_CLEARANCE;
+                    const totalAmount = transaction.payments.reduce((sum, payment) => sum + payment.amount, 0);
                     
-                    for (let col = 0; col < columns; col++) {
-                        const col_suffix = split_columns ? ` Col ${col + 1}` : "";
-                        
-                        cutting_list.push({
-                            name: `Drawer Front #${i + 1}${col_suffix}`,
-                            qty: 1,
-                            width: drawer_width,
-                            height: height,
-                            notes: "External drawer face"
-                        });
-                        
-                        cutting_list.push({
-                            name: `Drawer Back #${i + 1}${col_suffix}`,
-                            qty: 1,
-                            width: drawer_width - (2 * PANEL_THICKNESS),
-                            height: drawer_side_height,
-                            notes: "Fits between drawer sides"
-                        });
-                        
-                        cutting_list.push({
-                            name: `Drawer Side #${i + 1}${col_suffix}`,
-                            qty: 2,
-                            length: drawer_internal_depth,
-                            height: drawer_side_height,
-                            notes: "Grooved for bottom panel"
-                        });
-                        
-                        const bottom_width = drawer_width - (2 * PANEL_THICKNESS) + (2 * GROOVE_DEPTH);
-                        const bottom_depth = drawer_internal_depth + GROOVE_DEPTH;
-                        cutting_list.push({
-                            name: `Drawer Bottom #${i + 1}${col_suffix}`,
-                            qty: 1,
-                            width: bottom_width,
-                            depth: bottom_depth,
-                            thickness: `${BACK_PANEL_THICKNESS}mm`,
-                            notes: "6mm material, sits in grooves"
-                        });
-                    }
-                });
-                
-                const total_drawer_height = drawer_heights.reduce((sum, h) => sum + h, 0) + 
-                                          ((drawer_count - 1) * DRAWER_CLEARANCE);
-                available_height -= total_drawer_height;
-            }
-            
-            // Shelves
-            if (cabinetData.has_shelves && available_height > 0 && cabinetData.shelf_count > 0) {
-                const shelf_width = internal_width - 4;
-                const shelf_depth = cabinet_depth - groove_reduction - 50;
-                
-                cutting_list.push({
-                    name: "Shelf",
-                    qty: cabinetData.shelf_count,
-                    width: shelf_width,
-                    depth: shelf_depth,
-                    notes: "Adjustable shelf, sits 50mm from front"
-                });
-            }
-            
-            // Doors
-            if (cabinetData.has_doors) {
-                const door_style = cabinetData.door_config.style;
-                const door_count = cabinetData.door_config.count;
-                const door_gap = cabinetData.door_config.gap;
-                
-                let door_width, door_height;
-                
-                if (door_style === 'overlay') {
-                    if (door_count === 1) {
-                        door_width = cabinet_width;
-                        door_height = cabinet_height;
-                    } else {
-                        const total_gap_width = (door_count - 1) * door_gap;
-                        door_width = Math.floor((cabinet_width - total_gap_width) / door_count);
-                        door_height = cabinet_height;
-                    }
-                } else if (door_style === 'inset') {
-                    if (door_count === 1) {
-                        door_width = internal_width - 4;
-                        door_height = available_height - 4;
-                    } else {
-                        const total_gap_width = (door_count - 1) * door_gap;
-                        door_width = Math.floor((internal_width - 4 - total_gap_width) / door_count);
-                        door_height = available_height - 4;
-                    }
-                } else { // partial_overlay
-                    const overlay_amount = 6;
-                    if (door_count === 1) {
-                        door_width = internal_width + (2 * overlay_amount);
-                        door_height = available_height + (2 * overlay_amount);
-                    } else {
-                        const total_gap_width = (door_count - 1) * door_gap;
-                        door_width = Math.floor((internal_width + (2 * overlay_amount) - total_gap_width) / door_count);
-                        door_height = available_height + (2 * overlay_amount);
-                    }
-                }
-                
-                cutting_list.push({
-                    name: "Door",
-                    qty: door_count,
-                    width: door_width,
-                    height: door_height,
-                    notes: `${door_style} style, ${door_count === 1 ? 'single' : door_count + ' doors with ' + door_gap + 'mm gaps'}`
-                });
-                
-                const hinges_per_door = door_height > 1200 ? 3 : 2;
-                cutting_list.push({
-                    name: "Door Hinge",
-                    qty: door_count * hinges_per_door,
-                    notes: `${hinges_per_door} hinges per door`
-                });
-                
-                cutting_list.push({
-                    name: "Door Handle",
-                    qty: door_count,
-                    notes: "Door handles or knobs"
-                });
-            }
-            
-            // Wardrobe specific
-            if (cabinetData.type === 'wardrobe' && available_height >= 200) {
-                cutting_list.push({
-                    name: "Hanging Rail",
-                    qty: 1,
-                    length: internal_width - 20,
-                    notes: "25mm diameter hanging rail"
-                });
-                
-                cutting_list.push({
-                    name: "Rail Support Bracket",
-                    qty: 2,
-                    notes: "End-mounted rail brackets"
-                });
-            }
-
-            displayResults(cutting_list, cabinetData);
-        }
-
-        function formatDimensions(part) {
-            const dims = [];
-            if (part.width !== undefined) dims.push(`W:${part.width}`);
-            if (part.height !== undefined) dims.push(`H:${part.height}`);
-            if (part.depth !== undefined) dims.push(`D:${part.depth}`);
-            if (part.length !== undefined) dims.push(`L:${part.length}`);
-            return dims.join(' × ') + 'mm';
-        }
-
-        function displayResults(cuttingList, cabinetData) {
-            const container = document.getElementById('resultsContainer');
-            const totalParts = cuttingList.reduce((sum, part) => sum + part.qty, 0);
-            
-            let html = `
-                <div class="space-y-4">
-                    <div class="bg-white p-4 rounded border">
-                        <h3 class="font-bold text-lg mb-2">
-                            ${cabinetData.type.toUpperCase()} CABINET
-                        </h3>
-                        <p class="text-sm text-gray-600 mb-4">
-                            Dimensions: ${cabinetData.width}W × ${cabinetData.height}H × ${cabinetData.depth}D mm
-                        </p>
-                        
-                        <div class="space-y-2 scrollable-results">
-                            ${cuttingList.map((part, index) => `
-                                <div class="border-b pb-2 text-sm">
-                                    <div class="flex justify-between items-start">
-                                        <div class="flex-1">
-                                            <span class="font-medium">${index + 1}. ${part.name}</span>
-                                            <div class="text-gray-600">
-                                                Qty: ${part.qty} | ${formatDimensions(part)}
-                                                ${part.thickness ? ` (${part.thickness})` : ''}
-                                            </div>
-                                            ${part.notes ? `
-                                                <div class="text-xs text-blue-600 italic">
-                                                    ${part.notes}
-                                                </div>
-                                            ` : ''}
-                                        </div>
-                                    </div>
+                    return `
+                        <div class="transaction-item">
+                            <div class="transaction-header">
+                                <div>
+                                    <div class="transaction-id">${transaction.id}</div>
+                                    <div class="transaction-date">${formattedDate}</div>
                                 </div>
-                            `).join('')}
-                        </div>
-                        
-                        <div class="mt-4 pt-4 border-t">
-                            <div class="text-sm font-medium">
-                                SUMMARY: ${cuttingList.length} different parts, ${totalParts} total pieces
+                                <div>
+                                    <div class="transaction-amount">KES ${totalAmount.toLocaleString()}</div>
+                                    <span class="status-badge status-${transaction.status}">${transaction.status}</span>
+                                </div>
                             </div>
-                            <div class="text-xs text-gray-600">
-                                Material: 18mm panels, 6mm backs/bottoms
+                            <div class="transaction-details">
+                                ${transaction.payments.map(payment => `
+                                    <div class="detail-row">
+                                        <span class="detail-label">${payment.purpose}:</span>
+                                        <span class="detail-value">KES ${payment.amount.toLocaleString()}</span>
+                                    </div>
+                                `).join('')}
+                                <div class="detail-row">
+                                    <span class="detail-label">Phone:</span>
+                                    <span class="detail-value">+254${transaction.phone}</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <button onclick="exportResults()" class="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
-                        Export to File
-                    </button>
-                </div>
-            `;
-            
-            container.innerHTML = html;
-            
-            // Store current results globally for export
-            window.currentResults = cuttingList;
-            window.currentCabinetData = cabinetData;
-        }
-
-        function exportResults() {
-            if (!window.currentResults) {
-                alert('No cutting list to export. Generate a list first.');
-                return;
+                    `;
+                }).join('');
+                
+                transactionsList.innerHTML = transactionsHTML;
             }
             
-            const content = `CUTTING LIST - ${window.currentCabinetData.type.toUpperCase()} CABINET\n` +
-                `Dimensions: ${window.currentCabinetData.width}W × ${window.currentCabinetData.height}H × ${window.currentCabinetData.depth}D mm\n` +
-                '='.repeat(70) + '\n\n' +
-                window.currentResults.map((part, i) => 
-                    `${i + 1}. ${part.name.padEnd(25)} Qty: ${part.qty.toString().padStart(2)}  ${formatDimensions(part).padEnd(20)}${part.thickness ? ` (${part.thickness})` : ''}${part.notes ? ` - ${part.notes}` : ''}`
-                ).join('\n') +
-                '\n\n' + '='.repeat(70) + '\n' +
-                `SUMMARY: ${window.currentResults.length} different parts, ${window.currentResults.reduce((sum, part) => sum + part.qty, 0)} total pieces\n` +
-                'Material: 18mm panels, 6mm backs/bottoms';
+            function filterTransactions(allTransactions, filter) {
+                if (filter === 'all') return allTransactions;
+                return allTransactions.filter(transaction => transaction.status === filter);
+            }
             
-            const blob = new Blob([content], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `cutting_list_${window.currentCabinetData.type}_${window.currentCabinetData.width}x${window.currentCabinetData.height}x${window.currentCabinetData.depth}.txt`;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
+            function updateHistoryStats() {
+                const totalTransactions = transactions.length;
+                const completedTransactions = transactions.filter(t => t.status === 'completed').length;
+                const pendingTransactions = transactions.filter(t => t.status === 'pending').length;
+                const totalAmount = transactions
+                    .filter(t => t.status === 'completed')
+                    .reduce((sum, t) => sum + t.payments.reduce((pSum, p) => pSum + p.amount, 0), 0);
+                
+                historyStats.innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-number">${totalTransactions}</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${completedTransactions}</div>
+                        <div class="stat-label">Completed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${pendingTransactions}</div>
+                        <div class="stat-label">Pending</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">KES ${totalAmount.toLocaleString()}</div>
+                        <div class="stat-label">Total Paid</div>
+                    </div>
+                `;
+            }
+            
+            // Handle filter button clicks
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    currentFilter = this.dataset.filter;
+                    loadTransactions();
+                });
+            });
+            
+            // Add sample data for demonstration
+            function addSampleData() {
+                if (transactions.length === 0) {
+                    transactions = [
+                        {
+                            id: 'TX123456789',
+                            phone: '712345678',
+                            payments: [
+                                { purpose: 'Tithe', amount: 5000 },
+                                { purpose: 'Offering', amount: 1000 }
+                            ],
+                            date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+                            status: 'completed'
+                        },
+                        {
+                            id: 'TX123456790',
+                            phone: '712345678',
+                            payments: [
+                                { purpose: 'Tithe', amount: 3000 },
+                                { purpose: 'Mission', amount: 500 }
+                            ],
+                            date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+                            status: 'completed'
+                        },
+                        {
+                            id: 'TX123456791',
+                            phone: '712345678',
+                            payments: [
+                                { purpose: 'Building', amount: 2000 },
+                                { purpose: 'Offering', amount: 800 }
+                            ],
+                            date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+                            status: 'pending'
+                        },
+                        {
+                            id: 'TX123456792',
+                            phone: '712345678',
+                            payments: [
+                                { purpose: 'Tithe', amount: 4500 }
+                            ],
+                            date: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString(),
+                            status: 'failed'
+                        }
+                    ];
+                }
+            }
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey || e.metaKey) {
+                    switch(e.key) {
+                        case '1':
+                            e.preventDefault();
+                            switchTab('payment');
+                            break;
+                        case '2':
+                            e.preventDefault();
+                            switchTab('history');
+                            loadTransactions();
+                            updateHistoryStats();
+                            break;
+                    }
+                }
+            });
+            
+            // Auto-focus phone input when payment tab is active
+            function focusPhoneInput() {
+                if (paymentContent.classList.contains('active')) {
+                    phoneInput.focus();
+                }
+            }
+            
+            // Initialize the application
+            function init() {
+                addSampleData();
+                updateTotal();
+                focusPhoneInput();
+                
+                // Add some helpful tooltips
+                payBtn.title = 'Minimum payment is KES 10';
+                phoneInput.title = 'Enter your M-Pesa registered phone number';
+            }
+            
+            // Run initialization
+            init();
+            
+            // Add some interactivity enhancements
+            paymentRows.forEach(row => {
+                row.input.addEventListener('focus', function() {
+                    this.parentElement.parentElement.style.borderColor = '#3b82f6';
+                });
+                
+                row.input.addEventListener('blur', function() {
+                    this.parentElement.parentElement.style.borderColor = '#e2e8f0';
+                });
+            });
+            
+            // Add form validation feedback
+            phoneInput.addEventListener('input', function() {
+                const phone = this.value.replace(/\D/g, '');
+                const inputGroup = this.parentElement;
+                
+                if (phone.length === 9) {
+                    inputGroup.style.borderColor = '#10b981';
+                } else if (phone.length > 0) {
+                    inputGroup.style.borderColor = '#f59e0b';
+                } else {
+                    inputGroup.style.borderColor = '#e2e8f0';
+                }
+            });
+            
+            // Prevent form submission on Enter key in amount inputs
+            paymentRows.forEach(row => {
+                row.input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const nextInput = paymentRows[paymentRows.indexOf(row) + 1];
+                        if (nextInput) {
+                            nextInput.input.focus();
+                        } else {
+                            phoneInput.focus();
+                        }
+                    }
+                });
+            });
+            
+            // Add smooth scrolling for mobile
+            if (window.innerWidth <= 480) {
+                document.body.style.overflowX = 'hidden';
+            }
+            
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth <= 480) {
+                    document.body.style.overflowX = 'hidden';
+                } else {
+                    document.body.style.overflowX = 'auto';
+                }
+            });
+        });
     </script>
 </body>
 </html>
