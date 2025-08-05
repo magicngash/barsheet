@@ -20,7 +20,180 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
+            margin: 0;
+            overflow: hidden; /* Prevent scrolling during loading */
         }
+
+        body.loaded {
+            overflow: auto; /* Restore scrolling after loading */
+        }
+
+        /* Loading Screen Styles */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loading-logo {
+            width: 120px;
+            height: 120px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .loading-logo i {
+            font-size: 60px;
+            color: #1e3a8a;
+        }
+
+        .loading-text {
+            color: white;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .loading-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            margin-bottom: 40px;
+            text-align: center;
+            min-height: 20px;
+            transition: opacity 0.3s ease;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-progress {
+            width: 200px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .loading-progress-bar {
+            height: 100%;
+            background: white;
+            border-radius: 2px;
+            width: 0%;
+            animation: progressBar 3s ease-out forwards;
+        }
+
+        /* Loading screen sparkle effects */
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            animation: sparkle 2s ease-in-out infinite;
+        }
+
+        .sparkle:nth-child(1) { top: 20%; left: 15%; animation-delay: 0s; }
+        .sparkle:nth-child(2) { top: 40%; right: 20%; animation-delay: 0.5s; }
+        .sparkle:nth-child(3) { bottom: 30%; left: 25%; animation-delay: 1s; }
+        .sparkle:nth-child(4) { bottom: 20%; right: 15%; animation-delay: 1.5s; }
+
+        /* Loading screen background effects */
+        .loading-screen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1); 
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            }
+            50% { 
+                transform: scale(1.05); 
+                box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes progressBar {
+            0% { width: 0%; }
+            25% { width: 30%; }
+            50% { width: 60%; }
+            75% { width: 85%; }
+            100% { width: 100%; }
+        }
+
+        @keyframes sparkle {
+            0%, 100% { 
+                opacity: 0; 
+                transform: scale(0.5);
+            }
+            50% { 
+                opacity: 1; 
+                transform: scale(1);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        .loading-screen > div:not(.sparkle) {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .loading-logo { animation-delay: 0.1s; }
+        .loading-text { animation-delay: 0.2s; }
+        .loading-subtitle { animation-delay: 0.3s; }
+        .loading-spinner { animation-delay: 0.4s; }
+        .loading-progress { animation-delay: 0.5s; }
 
         .container {
             background: white;
@@ -496,6 +669,41 @@
             border-top: 1px solid #e2e8f0;
         }
 
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        /* Smooth transitions */
+        .tab-content {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* App container initially hidden */
+        .app-container {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease-in, visibility 0.5s ease-in;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .app-container.loaded {
+            opacity: 1;
+            visibility: visible;
+        }
+
         /* Responsive Design */
         @media (max-width: 480px) {
             .container {
@@ -532,177 +740,267 @@
             .history-stats {
                 grid-template-columns: repeat(2, 1fr);
             }
-        }
 
-        /* Loading Animation */
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Smooth transitions */
-        .tab-content {
-            animation: fadeIn 0.3s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            .loading-logo {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .loading-logo i {
+                font-size: 50px;
+            }
+            
+            .loading-text {
+                font-size: 20px;
+            }
+            
+            .loading-progress {
+                width: 150px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="logo">
-                <i class="fas fa-church"></i>
-            </div>
-            <h1>SDA Tithe Collection</h1>
-            <p>Secure M-Pesa Payments</p>
-        </div>
+    <!-- Enhanced Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <!-- Sparkle effects -->
+        <div class="sparkle"></div>
+        <div class="sparkle"></div>
+        <div class="sparkle"></div>
+        <div class="sparkle"></div>
         
-        <div class="nav-tabs">
-            <div class="nav-tab active" id="paymentTab">
-                <i class="fas fa-money-bill-wave"></i> Payment
-            </div>
-            <div class="nav-tab" id="historyTab">
-                <i class="fas fa-history"></i> History
-            </div>
+        <div class="loading-logo">
+            <i class="fas fa-church"></i>
         </div>
-        
-        <!-- Payment Tab Content -->
-        <div class="tab-content active" id="paymentContent">
-            <div class="form-group">
-                <label for="phone">Phone Number</label>
-                <div class="input-group">
-                    <i class="fas fa-mobile-alt"></i>
-                    <input type="tel" id="phone" class="form-control" placeholder="07XX XXX XXX" required>
-                </div>
-            </div>
-            
-            <div class="payment-rows">
-                <div class="payment-row">
-                    <div class="row-header">
-                        <div class="row-title">
-                            <i class="fas fa-hand-holding-heart"></i> Tithe
-                        </div>
-                        <div class="row-amount">KES <span id="amount1">0</span></div>
-                    </div>
-                    <div class="row-fields">
-                        <div class="purpose-label">Return 10% of your income to God</div>
-                        <input type="number" id="input1" class="amount-input" placeholder="0" min="0">
-                    </div>
-                </div>
-                
-                <div class="payment-row">
-                    <div class="row-header">
-                        <div class="row-title">
-                            <i class="fas fa-gift"></i> Offering
-                        </div>
-                        <div class="row-amount">KES <span id="amount2">0</span></div>
-                    </div>
-                    <div class="row-fields">
-                        <div class="purpose-label">Freewill offering for church work</div>
-                        <input type="number" id="input2" class="amount-input" placeholder="0" min="0">
-                    </div>
-                </div>
-                
-                <div class="payment-row">
-                    <div class="row-header">
-                        <div class="row-title">
-                            <i class="fas fa-globe"></i> Mission
-                        </div>
-                        <div class="row-amount">KES <span id="amount3">0</span></div>
-                    </div>
-                    <div class="row-fields">
-                        <div class="purpose-label">Support for mission projects</div>
-                        <input type="number" id="input3" class="amount-input" placeholder="0" min="0">
-                    </div>
-                </div>
-                
-                <div class="payment-row">
-                    <div class="row-header">
-                        <div class="row-title">
-                            <i class="fas fa-building"></i> Building
-                        </div>
-                        <div class="row-amount">KES <span id="amount4">0</span></div>
-                    </div>
-                    <div class="row-fields">
-                        <div class="purpose-label">Church building fund</div>
-                        <input type="number" id="input4" class="amount-input" placeholder="0" min="0">
-                    </div>
-                </div>
-            </div>
-            
-            <div class="summary">
-                <div class="summary-row">
-                    <span>Tithe:</span>
-                    <span id="summary1">KES 0</span>
-                </div>
-                <div class="summary-row">
-                    <span>Offering:</span>
-                    <span id="summary2">KES 0</span>
-                </div>
-                <div class="summary-row">
-                    <span>Mission:</span>
-                    <span id="summary3">KES 0</span>
-                </div>
-                <div class="summary-row">
-                    <span>Building:</span>
-                    <span id="summary4">KES 0</span>
-                </div>
-                <div class="summary-row total">
-                    <span>Total to Pay:</span>
-                    <span id="totalAmount">KES 0</span>
-                </div>
-            </div>
-            
-            <button type="button" class="btn" id="payBtn">
-                <i class="fas fa-lock"></i> Pay Total via M-Pesa
-            </button>
-            
-            <div id="message" class="message"></div>
-            
-            <div class="security-note">
-                <i class="fas fa-shield-alt"></i> Secured by M-Pesa and SSL Encryption
-            </div>
+        <div class="loading-text">SDA Tithe Collection</div>
+        <div class="loading-subtitle" id="loadingSubtitle">Preparing your secure payment platform...</div>
+        <div class="loading-spinner"></div>
+        <div class="loading-progress">
+            <div class="loading-progress-bar"></div>
         </div>
+    </div>
 
-        <!-- History Tab Content -->
-        <div class="tab-content" id="historyContent">
-            <div class="history-stats" id="historyStats">
-                <!-- Stats will be loaded here -->
-            </div>
-
-            <div class="filter-controls">
-                <button class="filter-btn active" data-filter="all">All</button>
-                <button class="filter-btn" data-filter="completed">Completed</button>
-                <button class="filter-btn" data-filter="pending">Pending</button>
-                <button class="filter-btn" data-filter="failed">Failed</button>
+    <!-- Main App Container -->
+    <div class="app-container" id="appContainer">
+        <div class="container">
+            <div class="header">
+                <div class="logo">
+                    <i class="fas fa-church"></i>
+                </div>
+                <h1>SDA Tithe Collection</h1>
+                <p>Secure M-Pesa Payments</p>
             </div>
             
-            <div id="transactionsList">
-                <!-- Transactions will be loaded here -->
+            <div class="nav-tabs">
+                <div class="nav-tab active" id="paymentTab">
+                    <i class="fas fa-money-bill-wave"></i> Payment
+                </div>
+                <div class="nav-tab" id="historyTab">
+                    <i class="fas fa-history"></i> History
+                </div>
             </div>
-        </div>
-        
-        <div class="footer">
-            <p>Seventh-day Adventist Church © 2024</p>
-            <p>All transactions are secure and confidential</p>
+            
+            <!-- Payment Tab Content -->
+            <div class="tab-content active" id="paymentContent">
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <div class="input-group">
+                        <i class="fas fa-mobile-alt"></i>
+                        <input type="tel" id="phone" class="form-control" placeholder="07XX XXX XXX" required>
+                    </div>
+                </div>
+                
+                <div class="payment-rows">
+                    <div class="payment-row">
+                        <div class="row-header">
+                            <div class="row-title">
+                                <i class="fas fa-hand-holding-heart"></i> Tithe
+                            </div>
+                            <div class="row-amount">KES <span id="amount1">0</span></div>
+                        </div>
+                        <div class="row-fields">
+                            <div class="purpose-label">Return 10% of your income to God</div>
+                            <input type="number" id="input1" class="amount-input" placeholder="0" min="0">
+                        </div>
+                    </div>
+                    
+                    <div class="payment-row">
+                        <div class="row-header">
+                            <div class="row-title">
+                                <i class="fas fa-gift"></i> Offering
+                            </div>
+                            <div class="row-amount">KES <span id="amount2">0</span></div>
+                        </div>
+                        <div class="row-fields">
+                            <div class="purpose-label">Freewill offering for church work</div>
+                            <input type="number" id="input2" class="amount-input" placeholder="0" min="0">
+                        </div>
+                    </div>
+                    
+                    <div class="payment-row">
+                        <div class="row-header">
+                            <div class="row-title">
+                                <i class="fas fa-globe"></i> Mission
+                            </div>
+                            <div class="row-amount">KES <span id="amount3">0</span></div>
+                        </div>
+                        <div class="row-fields">
+                            <div class="purpose-label">Support for mission projects</div>
+                            <input type="number" id="input3" class="amount-input" placeholder="0" min="0">
+                        </div>
+                    </div>
+                    
+                    <div class="payment-row">
+                        <div class="row-header">
+                            <div class="row-title">
+                                <i class="fas fa-building"></i> Building
+                            </div>
+                            <div class="row-amount">KES <span id="amount4">0</span></div>
+                        </div>
+                        <div class="row-fields">
+                            <div class="purpose-label">Church building fund</div>
+                            <input type="number" id="input4" class="amount-input" placeholder="0" min="0">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="summary">
+                    <div class="summary-row">
+                        <span>Tithe:</span>
+                        <span id="summary1">KES 0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Offering:</span>
+                        <span id="summary2">KES 0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Mission:</span>
+                        <span id="summary3">KES 0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Building:</span>
+                        <span id="summary4">KES 0</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total to Pay:</span>
+                        <span id="totalAmount">KES 0</span>
+                    </div>
+                </div>
+                
+                <button type="button" class="btn" id="payBtn">
+                    <i class="fas fa-lock"></i> Pay Total via M-Pesa
+                </button>
+                
+                <div id="message" class="message"></div>
+                
+                <div class="security-note">
+                    <i class="fas fa-shield-alt"></i> Secured by M-Pesa and SSL Encryption
+                </div>
+            </div>
+
+            <!-- History Tab Content -->
+            <div class="tab-content" id="historyContent">
+                <div class="history-stats" id="historyStats">
+                    <!-- Stats will be loaded here -->
+                </div>
+
+                <div class="filter-controls">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="completed">Completed</button>
+                    <button class="filter-btn" data-filter="pending">Pending</button>
+                    <button class="filter-btn" data-filter="failed">Failed</button>
+                </div>
+                
+                <div id="transactionsList">
+                    <!-- Transactions will be loaded here -->
+                </div>
+            </div>
+            
+            <div class="footer">
+                <p>Seventh-day Adventist Church © 2024</p>
+                <p>All transactions are secure and confidential</p>
+            </div>
         </div>
     </div>
 
     <script>
+        // Enhanced loading screen functionality
+        function showLoadingScreen() {
+            const loadingScreen = document.getElementById('loadingScreen');
+            const appContainer = document.getElementById('appContainer');
+            const subtitle = document.getElementById('loadingSubtitle');
+            
+            // Show loading screen
+            loadingScreen.style.opacity = '1';
+            loadingScreen.style.visibility = 'visible';
+            loadingScreen.classList.remove('hidden');
+            appContainer.classList.remove('loaded');
+            
+            // Reset progress bar animation
+            const progressBar = document.querySelector('.loading-progress-bar');
+            progressBar.style.animation = 'none';
+            progressBar.offsetHeight; // Trigger reflow
+            progressBar.style.animation = 'progressBar 3s ease-out forwards';
+            
+            // Enhanced loading messages with realistic progression
+            const loadingMessages = [
+                'Preparing your secure payment platform...',
+                'Initializing secure connection...',
+                'Loading payment systems...',
+                'Connecting to M-Pesa gateway...',
+                'Preparing user interface...',
+                'Almost ready...'
+            ];
+            
+            let messageIndex = 0;
+            subtitle.textContent = loadingMessages[0];
+            
+            // Progressive message updates with smooth transitions
+            const messageInterval = setInterval(() => {
+                messageIndex++;
+                if (messageIndex < loadingMessages.length) {
+                    subtitle.style.opacity = '0';
+                    setTimeout(() => {
+                        subtitle.textContent = loadingMessages[messageIndex];
+                        subtitle.style.opacity = '1';
+                    }, 150);
+                } else {
+                    clearInterval(messageInterval);
+                }
+            }, 600);
+            
+            // Complete loading sequence
+            setTimeout(() => {
+                hideLoadingScreen();
+            }, 3500);
+        }
+        
+        function hideLoadingScreen() {
+            const loadingScreen = document.getElementById('loadingScreen');
+            const appContainer = document.getElementById('appContainer');
+            
+            loadingScreen.classList.add('hidden');
+            appContainer.classList.add('loaded');
+            document.body.classList.add('loaded'); // Restore body scrolling
+            
+            // Remove loading screen from DOM after transition
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+            }, 500);
+        }
+        
+        // Show loading screen immediately
         document.addEventListener('DOMContentLoaded', function() {
+            // Start loading screen
+            showLoadingScreen();
+            
+            // Initialize app after loading screen
+            setTimeout(() => {
+                initializeApp();
+            }, 3500);
+        });
+        
+        function initializeApp() {
             // In-memory storage for transactions (works in Claude.ai environment)
             let transactions = [];
 
@@ -1188,7 +1486,7 @@
                     document.body.style.overflowX = 'auto';
                 }
             });
-        });
+        }
     </script>
 </body>
 </html>
